@@ -16,7 +16,7 @@ __status__ = "Development"
 
 def main():
     print("Hello World!")
-    cnf = [[1,2], [-2,3]]
+    cnf = [[1,2,3], [1,-2],[1,-3],[-1,3]]
     numOfVars = 3
 
     solvers = [ SatInterface(cnf,numOfVars), BasicDPLL(cnf,numOfVars) ]

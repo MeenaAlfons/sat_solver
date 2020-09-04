@@ -132,6 +132,7 @@ class BasicDPLL(SatInterface):
                 while len(self.assignmentStack) > 0:
                     var, _ = self.assignmentStack.pop()
                     self.model.pop(var, None)
+                    self.remainingVars.append(var)
                     previousVariable, previousValue = self.assignmentStack.top()
                     if previousValue == False: # unflipped
                         break

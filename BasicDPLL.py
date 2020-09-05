@@ -2,7 +2,7 @@
 """Provides BasicDPLL basic implementation for DPLL algorithm
 """
 
-from SatInterface import SatInterface
+from SatSolverInterface import SatSolverInterface
 from ListStack import ListStack
 
 __author__ = "Meena Alfons"
@@ -14,17 +14,15 @@ __maintainer__ = "Meena Alfons"
 __email__ = "meena.kerolos@gmail.com"
 __status__ = "Development"
 
-class BasicDPLL(SatInterface):
+class BasicDPLL(SatSolverInterface):
     # The datastructure needed for DPLL will be represented
     # in member variables
 
     # Assume cnf is an array of arrays
-    def __init__(self, cnf, numOfVars):
+    def __init__(self, cnf, numOfVars, metrics):
         self.cnf = cnf
         self.numOfVars = numOfVars
-        self.remainingClauses = cnf
-        self.satisfiedClausesStack = ListStack()
-        self.model = {}
+        self.metrics = metrics
 
     # Solve tries to find a satisfying assignment for
     # the CNF statement given in the constructor
@@ -34,10 +32,11 @@ class BasicDPLL(SatInterface):
     # - self.satisfiedClausesStack: a stack of satisfied clauses at each step
     # - self.assignmentStack: a running stack of variable assignment
     def solve(self):
+        self.remainingClauses = self.cnf
         self.remainingVars = [i+1 for i in range(self.numOfVars)]
-        print(self.remainingVars)
         self.assignmentStack = ListStack()
-
+        self.satisfiedClausesStack = ListStack()
+        self.model = {}
 
         if len(self.remainingClauses) == 0:
             return self.SAT({})
@@ -63,8 +62,6 @@ class BasicDPLL(SatInterface):
             else:
                 # choose another variable
                 pass
-
-
 
     def chooseNextAssignment(self, ignoreChildBranches):
         if len(self.assignmentStack) == 0:
@@ -157,6 +154,7 @@ class BasicDPLL(SatInterface):
         return "UNDETERMINED", variable, value
 
     def deduce(self, variable, value):
+        self.metrics.deduce()
         satisfiedClauses = []
         localRemainingClauses = []
 

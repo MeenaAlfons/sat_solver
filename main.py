@@ -2,7 +2,8 @@
 """Provides main function for testing SatSolvers
 """
 
-from SatInterface import SatInterface
+from SatSolverInterface import SatSolverInterface
+from InMemoryMetrics import InMemoryMetrics
 from BasicDPLL import BasicDPLL
 
 __author__ = "Meena Alfons"
@@ -15,15 +16,21 @@ __email__ = "meena.kerolos@gmail.com"
 __status__ = "Development"
 
 def main():
-    print("Hello World!")
     cnf = [[1,2,3], [1,-2],[1,-3],[-1,3]]
     numOfVars = 3
 
-    solvers = [ SatInterface(cnf,numOfVars), BasicDPLL(cnf,numOfVars) ]
+    solverSpecs = [{
+        "SolverClass": SatSolverInterface,
+    },{
+        "SolverClass": BasicDPLL,
+    }]
 
-    for solver in solvers:
+    for solverSpec in solverSpecs:
+        SolverClass = solverSpec["SolverClass"]
+        metrics = InMemoryMetrics()
+        solver = SolverClass(cnf, numOfVars, metrics)
         result, model = solver.solve()
-        print("result={}, model={}".format(result, model))
+        print("result={}, model={}, deduceCount={}".format(result, model, metrics.getDeduceCount()))
 
 if __name__ == "__main__":
     main()

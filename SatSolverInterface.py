@@ -11,8 +11,8 @@ __maintainer__ = "Meena Alfons"
 __email__ = "meena.kerolos@gmail.com"
 __status__ = "Development"
 
-class SatInterface:
-    def __init__(self, cnf, numOfVars):
+class SatSolverInterface:
+    def __init__(self, cnf, numOfVars, metrics):
         # Assume cnf is an array of arrays
         print("SatInterface constructor not implemented")
         pass

@@ -15,9 +15,24 @@ __maintainer__ = "Meena Alfons"
 __email__ = "meena.kerolos@gmail.com"
 __status__ = "Development"
 
+
+def load_sudoku_rules(filename):
+    with open(filename) as f:
+        rules = f.read()
+        # split between clauses and drop las (empty) clause
+        rules = rules.split('0')[:-1]
+
+        # trim 'newline'
+        rules = [c[1:-1] for c in rules]
+
+        # split clauses and cast to int
+        rules = [[int(l) for l in c.split(' ')] for c in rules][:-1]
+
+        return rules
+
 def main():
-    cnf = [[1,2,3], [1,-2],[1,-3],[-1,3]]
-    numOfVars = 3
+    cnf = load_sudoku_rules('sudoku-rules.txt')
+    numOfVars = 9*9*9
 
     solverSpecs = [{
         "SolverClass": SatSolverInterface,

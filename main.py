@@ -5,6 +5,7 @@
 from SatSolverInterface import SatSolverInterface
 from InMemoryMetrics import InMemoryMetrics
 from BasicDPLL import BasicDPLL
+from math import sqrt
 
 __author__ = "Meena Alfons"
 __copyright__ = "Copyright 2020, Knowledge Representation, SatSolver Project, Group 25"
@@ -30,9 +31,37 @@ def load_sudoku_rules(filename):
 
         return rules
 
+def load_sudoku(filename, which):
+    """
+    Loads a sudoku form a collection and returns the DIMACS format of it.
+    Works only for square sudokus.
+
+    :param filename: File with the sudoku collection.
+    :param which: The index of the sudoku that is choosen from the collection.
+    :return: DIMACS clauses representing the sudoku instance.
+    """
+    with open(filename) as f:
+        # read all sudokus
+        sudokus = f.readlines()
+        # choose one and trim 'newline'
+        sudoku = sudokus[which][:-1]
+        size = len(sudoku)
+
+        sudoku_dimacs = []
+        position = 0  # counter for position in the string
+        for row in range(int(sqrt(size))):
+            for col in range(int(sqrt(size))):
+                if sudoku[position] != '.':
+                    sudoku_dimacs.append([int(str(row+1) + str(col+1) + sudoku[position])])
+                position += 1
+
+        return sudoku_dimacs
+
 def main():
-    cnf = load_sudoku_rules('sudoku-rules.txt')
-    numOfVars = 9*9*9
+    numOfVars = 4*4*4
+    rules = load_sudoku_rules('rules/sudoku-rules_4x4.txt')
+    sudoku = load_sudoku('sudokus/1000_sudokus_4x4.txt', 0)
+    cnf = rules + sudoku
 
     solverSpecs = [{
         "SolverClass": SatSolverInterface,

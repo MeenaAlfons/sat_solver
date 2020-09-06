@@ -15,7 +15,7 @@ __email__ = "meena.kerolos@gmail.com"
 __status__ = "Development"
 
 class TestSatSolver(unittest.TestCase):
-    def setSolverClass(self, SatSolverClass):
+    def setSatSolverClass(self, SatSolverClass):
         self.SatSolverClass = SatSolverClass
 
     def all(self):

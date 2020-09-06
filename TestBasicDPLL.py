@@ -20,7 +20,7 @@ class TestBasicDPLL(TestSatSolver):
         """
         Test BasicDPLL
         """
-        self.setSolverClass(BasicDPLL)
+        self.setSatSolverClass(BasicDPLL)
         self.all()
 
 if __name__ == '__main__':

@@ -20,3 +20,6 @@ class InMemoryMetrics:
 
     def getDeduceCount(self):
         return self.deduceCount
+
+    def reset(self):
+        self.deduceCount = 0

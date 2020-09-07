@@ -18,3 +18,6 @@ class MetricsInterface:
     def getDeduceCount(self):
         print("MetricsInterface.getDeduceCount() Not implemented")
         return 0
+
+    def reset(self):
+        print("MetricsInterface.reset() Not implemented")

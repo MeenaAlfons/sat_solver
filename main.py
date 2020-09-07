@@ -17,14 +17,11 @@ __email__ = "meena.kerolos@gmail.com"
 __status__ = "Development"
 
 
-def load_sudoku_rules(filename):
+def load_dimacs(filename):
     with open(filename) as f:
         rules = f.read()
         # split between clauses and drop las (empty) clause
-        rules = rules.split('0')[:-1]
-
-        # trim 'newline'
-        rules = [c[1:-1] for c in rules]
+        rules = rules.replace('\n', '').split(' 0')[:-1]
 
         # split clauses and cast to int
         rules = [[int(l) for l in c.split(' ')] for c in rules][:-1]
@@ -45,21 +42,21 @@ def load_sudoku(filename, which):
         sudokus = f.readlines()
         # choose one and trim 'newline'
         sudoku = sudokus[which][:-1]
-        size = len(sudoku)
+        size = int(sqrt(len(sudoku)))
 
-        sudoku_dimacs = []
+        sudoku_instance_cnf = []
         position = 0  # counter for position in the string
-        for row in range(int(sqrt(size))):
-            for col in range(int(sqrt(size))):
+        for row in range(size):
+            for col in range(size):
                 if sudoku[position] != '.':
-                    sudoku_dimacs.append([int(str(row+1) + str(col+1) + sudoku[position])])
+                    sudoku_instance_cnf.append([int(str(row+1) + str(col+1) + sudoku[position])])
                 position += 1
 
-        return sudoku_dimacs
+        return sudoku_instance_cnf
 
 def main():
     numOfVars = 4*4*4
-    rules = load_sudoku_rules('rules/sudoku-rules_4x4.txt')
+    rules = load_dimacs('rules/sudoku-rules_4x4.txt')
     sudoku = load_sudoku('sudokus/1000_sudokus_4x4.txt', 0)
     cnf = rules + sudoku
 

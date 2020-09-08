@@ -15,7 +15,6 @@ class SudokuRules:
     def add_standard_constraint(self):
         """
         Creates the constraint which states that each field must have exactly one assignment.
-        :return: cnf. list of lists
         """
         for row in range(self.sudoku_size):
             for col in range(self.sudoku_size):
@@ -35,7 +34,6 @@ class SudokuRules:
         generates a alldiff constraint for a given row.
 
         :param row: row to create the alldiff for.
-        :return: alldiff row constraint in cnf. list of lists
         """
         if row > 0 and row <= self.sudoku_size:
             for v in range(self.sudoku_size):  # for each value
@@ -63,9 +61,27 @@ class SudokuRules:
         generates a alldiff constraint for a given column.
 
         :param col: column to create the alldiff for.
-        :return: alldiff column constraint in cnf. list of lists
         """
-        pass
+        if col > 0 and col <= self.sudoku_size:
+            for v in range(self.sudoku_size):  # for each value
+                curr_vars = [int(str(row + 1) + str(col) + str(v + 1)) for row in range(self.sudoku_size)]
+                # at least once
+                self.rules_cnf.append(curr_vars)
+
+                # at most once
+                pairs = list(itertools.combinations(curr_vars, 2))
+                pairs = [[-a, -b] for a, b in pairs]
+                self.rules_cnf.extend(pairs)
+        else:
+            raise Exception("Column out of range!")
+
+    def add_alldiff_col_cum(self, col):
+        """
+        Generates alldiff row constraint from row 1 until row 'row'
+        :param row: Row up to which the constraints should be generated.
+        """
+        for i in range(col):
+            self.add_alldiff_col(i+1)
 
     def add_alldiff_block(self, block):
         """
@@ -73,7 +89,6 @@ class SudokuRules:
         from the upper left going to lower right
 
         :param block: block to create the alldiff for.
-        :return: alldiff block constraint in cnf. list of lists
         """
         pass
 

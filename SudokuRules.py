@@ -1,4 +1,5 @@
 import itertools
+from math import sqrt
 
 
 class SudokuRules:
@@ -77,8 +78,8 @@ class SudokuRules:
 
     def add_alldiff_col_cum(self, col):
         """
-        Generates alldiff row constraint from row 1 until row 'row'
-        :param row: Row up to which the constraints should be generated.
+        Generates alldiff col constraint from row 1 until column 'col'
+        :param row: Column up to which the constraints should be generated.
         """
         for i in range(col):
             self.add_alldiff_col(i+1)
@@ -90,7 +91,40 @@ class SudokuRules:
 
         :param block: block to create the alldiff for.
         """
-        pass
+        # get right block indices. (This is a bit messy, sorry)
+        block_dim = int(sqrt(self.sudoku_size))
+        block_row = int((block-1)/block_dim) + 1
+        block_col = (block-1) % block_dim + 1
+
+
+        # get the right indices for that block
+        row_indices = []
+        col_indices = []
+        indices = []
+        row_indices.extend([(block_row - 1) * block_dim + c + 1 for c in range(block_dim)])
+        col_indices.extend([(block_col - 1) * block_dim + c + 1 for c in range(block_dim)])
+        for m in range(block_dim):
+            indices.extend([[row_indices[m], col_indices[c]] for c in range(block_dim)])
+
+        # add the formulas
+        for v in range(self.sudoku_size):  # for each value
+            curr_vars = [int(str(i) + str(j) + str(v+1)) for i, j in indices]
+            # at least one in the block must have value v
+            self.rules_cnf.append(curr_vars)
+
+            # at most one
+            pairs = list(itertools.combinations(curr_vars, 2))
+            pairs = [[-a, -b] for a, b in pairs]
+            self.rules_cnf.extend(pairs)
+
+    def add_alldiff_block_cum(self, block):
+        """
+        Generates alldiff block constraint from block 1 until block 'block'. Blocks are
+        counted from left-uppermost to right-lowermost.
+        :param row: block up to which the constraints should be generated.
+        """
+        for i in range(block):
+            self.add_alldiff_block(i+1)
 
     def save_as_dimacs(self, filename):
         dimacs = ""

@@ -8,10 +8,19 @@ class SudokuRules:
     """
     def __init__(self, sudoku_size):
         """
+        Initializes rule cnf with standard constraints.
         :param sudoku_size: size of the square sudoku. E.g. size of a 9*9 sudoku is 9.
         """
         self.sudoku_size = sudoku_size
         self.rules_cnf = []
+        self.add_standard_constraint()
+
+    def reset(self):
+        """
+        Resets to standard constraints.
+        """
+        self.rules_cnf = []
+        self.add_standard_constraint()
 
     def add_standard_constraint(self):
         """
@@ -139,6 +148,5 @@ class SudokuRules:
             dimacs += str(c).replace(",", "")[1:-1] + " 0\n"
 
         print(dimacs)
-        # Todo: maybe do this a bit safer to avoid overwriting?
         with open(filename, 'w+') as f:
             f.write(dimacs)

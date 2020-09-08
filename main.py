@@ -20,7 +20,7 @@ __status__ = "Development"
 def main():
     rules, numOfVars = load_dimacs('rules/sudoku-rules_4x4.txt')
     sudoku = load_sudokus('sudokus/1000_sudokus_4x4.txt')
-    cnf = rules + sudoku
+    cnf = rules + sudoku[0]
 
     solverSpecs = [{
         "SolverClass": SatSolverInterface,

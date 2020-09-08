@@ -28,7 +28,7 @@ def load_dimacs(filename):
         # split clauses and cast to int
         cnf = [[int(l) for l in c.split(' ')] for c in cnf][:-1]
 
-        return cnf, n_vars
+        return cnf, int(n_vars)
 
 
 def load_sudokus(filename):

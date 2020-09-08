@@ -12,9 +12,9 @@ __email__ = "meena.kerolos@gmail.com"
 __status__ = "Development"
 
 class MetricsInterface:
-    def deduce(self):
-        print("MetricsInterface.deduce() Not implemented")
+    def incrementCounter(self, name):
+        print("MetricsInterface.incrementCounter() Not implemented")
 
-    def getDeduceCount(self):
-        print("MetricsInterface.getDeduceCount() Not implemented")
-        return 0
+    def print(self):
+        print("MetricsInterface.print() Not implemented")
+

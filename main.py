@@ -5,6 +5,7 @@
 from SatSolverInterface import SatSolverInterface
 from InMemoryMetrics import InMemoryMetrics
 from BasicDPLL import BasicDPLL
+from dimacs_tools import load_dimacs, load_sudokus
 
 __author__ = "Meena Alfons"
 __copyright__ = "Copyright 2020, Knowledge Representation, SatSolver Project, Group 25"
@@ -15,9 +16,11 @@ __maintainer__ = "Meena Alfons"
 __email__ = "meena.kerolos@gmail.com"
 __status__ = "Development"
 
+
 def main():
-    cnf = [[1,2,3], [1,-2],[1,-3],[-1,3]]
-    numOfVars = 3
+    rules, numOfVars = load_dimacs('rules/sudoku-rules_4x4.txt')
+    sudoku = load_sudokus('sudokus/1000_sudokus_4x4.txt')
+    cnf = rules + sudoku[0]
 
     solverSpecs = [{
         "SolverClass": SatSolverInterface,
@@ -31,6 +34,7 @@ def main():
         solver = SolverClass(cnf, numOfVars, metrics)
         result, model = solver.solve()
         print("result={}, model={}, deduceCount={}".format(result, model, metrics.getDeduceCount()))
+
 
 if __name__ == "__main__":
     main()

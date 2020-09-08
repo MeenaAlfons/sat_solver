@@ -1,4 +1,4 @@
-from dimacs_tools import load_sudoku, load_dimacs
+from dimacs_tools import load_sudokus, load_dimacs
 from InMemoryMetrics import InMemoryMetrics
 from BasicDPLL import BasicDPLL
 from pandas import DataFrame
@@ -9,8 +9,8 @@ def main():
     rule_files = ['rules/sudoku-rules_4x4.txt', 'rules/sudoku-rules_9x9.txt']
     # for testing: ruleset_cnfs = [[[1, 2], [-1, 3], [1]],  [[1], [2]]]
 
-    # load sudokus we want to test on. Modyfy 'i' to change the choosen sudokus.
-    sudoku_cnfs = [load_sudoku('sudokus/1000_sudokus_9x9.txt', i) for i in range(10)]
+    # load sudokus from file
+    sudoku_cnfs = load_sudokus('sudokus/1000_sudokus_9x9.txt')
 
     # create dataframe for storing results.
     # Todo: we still need to decide on what our final metrics should be.
@@ -19,16 +19,15 @@ def main():
     results = DataFrame(columns=['constraints', 'deduce_count'])
 
     # choose metrics
-    num_of_vars = 4*4
     metrics = InMemoryMetrics()
     # for every constraint set, run the solver on the test-sudokus.
     for f in rule_files:
         # load current constraint set
-        rule = load_dimacs(f)
+        rule, num_vars = load_dimacs(f)
         for sudoku in sudoku_cnfs:
             # solve if possible
             cnf = rule + sudoku
-            solver = BasicDPLL(cnf, num_of_vars, metrics)
+            solver = BasicDPLL(cnf, num_vars, metrics)
             result = solver.solve()[0]
             if result == 'SAT':  # We can still decide if we also want to report the UNSAT cases
                 results = results.append({'constraints': f[6:-4],  # to keep just the file name

@@ -20,12 +20,13 @@ class SudokuRules:
         for row in range(self.sudoku_size):
             for col in range(self.sudoku_size):
                 field = str(row+1) + str(col+1)
+                curr_vars = [int(field + str(i+1)) for i in range(self.sudoku_size)]
 
                 # at least one value
-                self.rules_cnf.append([int(field + str(i+1)) for i in range(self.sudoku_size)])
+                self.rules_cnf.append(curr_vars)
 
                 # at most one value
-                pairs = list(itertools.combinations([int(field + str(i+1)) for i in range(self.sudoku_size)], 2))
+                pairs = list(itertools.combinations(curr_vars, 2))
                 pairs = [[-a, -b] for a, b in pairs]
                 self.rules_cnf.extend(pairs)
 
@@ -36,7 +37,26 @@ class SudokuRules:
         :param row: row to create the alldiff for.
         :return: alldiff row constraint in cnf. list of lists
         """
-        pass
+        if row > 0 and row <= self.sudoku_size:
+            for v in range(self.sudoku_size):  # for each value
+                curr_vars = [int(str(row) + str(col+1) + str(v+1)) for col in range(self.sudoku_size)]
+                # at least once
+                self.rules_cnf.append(curr_vars)
+
+                # at most once
+                pairs = list(itertools.combinations(curr_vars, 2))
+                pairs = [[-a, -b] for a, b in pairs]
+                self.rules_cnf.extend(pairs)
+        else:
+            raise Exception("Row out of range!")
+
+    def add_alldiff_row_cum(self, row):
+        """
+        Generates alldiff row constraint from row 1 until row 'row'
+        :param row: Row up to which the constraints should be generated.
+        """
+        for i in range(row):
+            self.add_alldiff_row(i+1)
 
     def add_alldiff_col(self, col):
         """

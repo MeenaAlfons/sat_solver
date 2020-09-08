@@ -16,7 +16,7 @@ __email__ = "meena.kerolos@gmail.com"
 __status__ = "Development"
 
 def main():
-    cnf = [[1,2,3], [1,-2],[1,-3],[-1,3]]
+    cnf = [[1,2,3], [1,-2],[1,-3],[-1,3], [1]]
     numOfVars = 3
 
     solverSpecs = [{

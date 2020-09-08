@@ -41,6 +41,42 @@ class BasicDPLL(SatSolverInterface):
         if len(self.remainingClauses) == 0:
             return self.SAT({})
 
+        # unit propagation
+        # take first unit clause
+        while True:
+            remaining_uc = False
+            for clause in self.remainingClauses:
+                if len(clause) == 1:
+                    # remove uc from remaining clauses
+                    self.remainingClauses.remove(clause)
+                    # remove var from remaining vars
+                    self.remainingVars.remove(clause[0])
+                    # add correct polarity to assignment stack
+                    if clause[0] < 0:
+                        value = False
+                    else:
+                        value = True
+                    self.assignmentStack.push((abs(clause[0]), value))
+
+                    # propagate to all other clauses.
+                    # Delete all clauses that contain this literal. They are already satisfied.
+                    self.remainingClauses = [c for c in self.remainingClauses if (not clause[0] in c)]
+
+                    # remove the negative literal from the clause if it is contained.
+                    self.remainingClauses = [[l for l in c if l != clause[0]*-1] for c in self.remainingClauses]
+
+
+            # check if there is any UC left
+            for c in self.remainingClauses:
+                if len(c) == 1:
+                    remaining_uc = True
+                    break
+
+            # TODO: after this there might still be unassigned vars. those can be set to whatever
+            if remaining_uc == False:
+                break
+
+
         ignoreChildBranches = False
         while True:
             result, variable, value = self.chooseNextAssignment(ignoreChildBranches)

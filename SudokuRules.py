@@ -56,3 +56,20 @@ class SudokuRules:
         :return: alldiff block constraint in cnf. list of lists
         """
         pass
+
+    def save_as_dimacs(self, filename):
+        dimacs = ""
+
+        # first line with parameters
+        n_vars = str(self.sudoku_size)*3
+        clauses = str(len(self.rules_cnf))
+        dimacs += "p cnf " + n_vars + " " + clauses + "\n"
+
+        # write the clauses
+        for c in self.rules_cnf:
+            dimacs += str(c).replace(",", "")[1:-1] + " 0\n"
+
+        print(dimacs)
+        # Todo: maybe do this a bit safer to avoid overwriting?
+        with open(filename, 'w+') as f:
+            f.write(dimacs)

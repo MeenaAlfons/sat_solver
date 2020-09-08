@@ -28,30 +28,31 @@ def load_dimacs(filename):
         # split clauses and cast to int
         cnf = [[int(l) for l in c.split(' ')] for c in cnf][:-1]
 
-        return (cnf, n_vars)
+        return cnf, n_vars
 
-def load_sudoku(filename, which):
+
+def load_sudokus(filename):
     """
-    Loads a sudoku form a collection and returns the DIMACS format of it.
+    Loads all sudokus form a collection and returns the DIMACS format of it.
     Works only for square sudokus.
 
     :param filename: File with the sudoku collection.
-    :param which: The index of the sudoku that is choosen from the collection.
     :return: DIMACS clauses representing the sudoku instance.
     """
     with open(filename) as f:
         # read all sudokus
         sudokus = f.readlines()
-        # choose one and trim 'newline'
-        sudoku = sudokus[which][:-1]
-        size = int(sqrt(len(sudoku)))
+        # determine sudoku size
+        size = int(sqrt(len(sudokus[0])))
 
-        sudoku_instance_cnf = []
-        position = 0  # counter for position in the string
-        for row in range(size):
-            for col in range(size):
-                if sudoku[position] != '.':
-                    sudoku_instance_cnf.append([int(str(row+1) + str(col+1) + sudoku[position])])
-                position += 1
+        sudoku_instances_cnf = [[] for i in range(len(sudokus))]
+        for i in range(len(sudokus)):
+            position = 0  # counter for position in the string
+            for row in range(size):
+                for col in range(size):  # this line implicitly drops the newline
+                    if sudokus[i][position] != '.':
+                        # add already filled-in var as a fact to the cnf
+                        sudoku_instances_cnf[i].append([int(str(row+1) + str(col+1) + sudokus[i][position])])
+                    position += 1
 
-        return sudoku_instance_cnf
+        return sudoku_instances_cnf

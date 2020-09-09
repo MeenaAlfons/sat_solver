@@ -43,12 +43,12 @@ class TestSatSolver(unittest.TestCase):
         for test in tests:
             solver = self.SatSolverClass(test["cnf"], test["numOfVars"], metrics)
             result, model = solver.solve()
-            self.assertEqual(result, test["expectedResult"])
+            self.assertEqual(result, test["expectedResult"], test)
             if test["expectedResult"] == "SAT":
                 isSat, someDontCare = self.validate(test["cnf"], model)
-                self.assertTrue(isSat)
-                self.assertEqual(test["expectDontCare"], someDontCare)
-        print("Totals: deduce={}".format(metrics.getDeduceCount()))
+                self.assertTrue(isSat, test)
+                self.assertEqual(test["expectDontCare"], someDontCare, test)
+        metrics.print()
 
 
     def validate(self, cnf, model):

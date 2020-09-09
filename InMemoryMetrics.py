@@ -13,10 +13,19 @@ __status__ = "Development"
 
 class InMemoryMetrics:
     def __init__(self):
-        self.deduceCount = 0
+        self.counters = {}
 
-    def deduce(self):
-        self.deduceCount += 1
+    def incrementCounter(self, name):
+        if name in self.counters:
+            self.counters[name] +=1
+        else:
+            self.counters[name] = 1
 
-    def getDeduceCount(self):
-        return self.deduceCount
+        if self.counters[name] % 10000 == 0:
+            self.print()
+
+    def print(self):
+        line = "counters:"
+        for name in self.counters:
+            line += " " + name + "=" + str(self.counters[name])
+        print(line)

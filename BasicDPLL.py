@@ -2,7 +2,10 @@
 """Provides BasicDPLL basic implementation for DPLL algorithm
 """
 
+import time
+
 from SatSolverInterface import SatSolverInterface
+from CNFState import CNFState
 from ListStack import ListStack
 
 __author__ = "Meena Alfons"
@@ -15,9 +18,6 @@ __email__ = "meena.kerolos@gmail.com"
 __status__ = "Development"
 
 class BasicDPLL(SatSolverInterface):
-    # The datastructure needed for DPLL will be represented
-    # in member variables
-
     # Assume cnf is an array of arrays
     def __init__(self, cnf, numOfVars, metrics):
         self.cnf = cnf
@@ -26,31 +26,24 @@ class BasicDPLL(SatSolverInterface):
 
     # Solve tries to find a satisfying assignment for
     # the CNF statement given in the constructor
-    #
-    # Preconditions:
-    # - self.remainingClauses: an array of clauses has unassigned variables
-    # - self.satisfiedClausesStack: a stack of satisfied clauses at each step
-    # - self.assignmentStack: a running stack of variable assignment
     def solve(self):
-        self.remainingClauses = self.cnf
-        self.remainingVars = [i+1 for i in range(self.numOfVars)]
-        self.assignmentStack = ListStack()
-        self.satisfiedClausesStack = ListStack()
-        self.model = {}
-
-        if len(self.remainingClauses) == 0:
+        if len(self.cnf) == 0:
             return self.SAT({})
+
+        self.cnfState = CNFState(self.cnf, self.numOfVars, self.metrics)
+        variablesClauseCount = self.cnfState.getVariablesClauseCount()
+        self.remainingVars = list(variablesClauseCount.keys())
 
         ignoreChildBranches = False
         while True:
-            result, variable, value = self.chooseNextAssignment(ignoreChildBranches)
-            if result == "UNSAT":
-                return self.UNSAT()
+            self.metrics.incrementCounter("loop")
 
             # status = {CONFLICT, SAT, UNDETERMINED}
-            status = self.deduce(variable, value)
+            status, _, _ = self.chooseNextAssignment(ignoreChildBranches)
             ignoreChildBranches = False
-            if status == "CONFLICT":
+            if status == "UNSAT":
+                return self.UNSAT()
+            elif status == "CONFLICT":
                 # we need to inform chooseNextAssignment to ignore the subtree
                 # of the current branch and choose a branch beyond that
                 # (This operation is called bcktrack)
@@ -58,22 +51,20 @@ class BasicDPLL(SatSolverInterface):
                 ignoreChildBranches = True
                 pass
             elif status == "SAT":
-                return self.SAT(self.model)
+                return self.SAT(self.cnfState.getModel())
             else:
                 # choose another variable
                 pass
 
     def chooseNextAssignment(self, ignoreChildBranches):
-        if len(self.assignmentStack) == 0:
+        if self.cnfState.assignmentLength() == 0:
             variable = self.remainingVars.pop()
             value = False
-            self.assignmentStack.push((variable, value))
-            self.model[variable] = value
+            # self.assignmentStack.push((variable, value))
+            # self.model[variable] = value
+            status,variable,value = self.cnfState.pushAssignment(variable, value)
         else:
-            currentVariable, currentValue = self.assignmentStack.top()
-            # self.assignmentStack.pop()
-            # self.model.pop(variable, None)
-
+            _, currentValue = self.cnfState.lastAssignment()
             # Here we have a three way decision:
             # 1. Go down the tree (add one more variable)
             # 2. Flip the current variable
@@ -113,76 +104,20 @@ class BasicDPLL(SatSolverInterface):
                     # Flip that variable
                     action = "UP"
 
-
             if action == "FLIP":
-                self.assignmentStack.pop()
-                variable = currentVariable
-                value = not currentValue
-                self.assignmentStack.push((variable, value))
-                self.model[variable] = value
+                status,variable,value = self.cnfState.flipLastAssignment()
             elif action == "DOWN":
                 variable = self.remainingVars.pop()
                 value = False
-                self.assignmentStack.push((variable, value))
-                self.model[variable] = value
+                status,variable,value = self.cnfState.pushAssignment(variable,value)
             elif action == "UP":
-                while len(self.assignmentStack) > 0:
-                    var, _ = self.assignmentStack.pop()
-                    self.model.pop(var, None)
-                    self.remainingVars.append(var)
-                    previousVariable, previousValue = self.assignmentStack.top()
-                    if previousValue == False: # unflipped
-                        break
-
-                if len(self.assignmentStack) == 0:
+                status, popedVariables = self.cnfState.backtrackUntilUnflipped()
+                if status == "UNSAT":
                     return "UNSAT", None, None
+                self.remainingVars.extend(popedVariables)
 
-                # Flip the variable on the top of the stack
-                previousVariable, previousValue = self.assignmentStack.pop()
-                variable = previousVariable
-                value = not previousValue
-                self.assignmentStack.push((variable, value))
-                self.model[variable] = value
-
-                # Unwind the satisfiedClausesStack until it contains len(assignmentStack)-1
-                while len(self.satisfiedClausesStack) >= len(self.assignmentStack):
-                    clauses = self.satisfiedClausesStack.pop()
-                    self.remainingClauses.extend(clauses)
+                status, variable, value = self.cnfState.flipLastAssignment()
             else:
                 raise "Not Implemented"
 
-        return "UNDETERMINED", variable, value
-
-    def deduce(self, variable, value):
-        self.metrics.deduce()
-        satisfiedClauses = []
-        localRemainingClauses = []
-
-        for clause in self.remainingClauses:
-            sat = False
-            numOfFalseValues = 0
-            for literal in clause:
-                variable = abs(literal)
-                if variable in self.model:
-                    varValue = self.model[variable]
-                    literalValue = varValue if literal > 0 else not varValue
-                    if literalValue == True:
-                        sat = True
-                        break
-                    else:
-                        numOfFalseValues = numOfFalseValues + 1
-
-            if sat:
-                satisfiedClauses.append(clause)
-            elif numOfFalseValues == len(clause):
-                return "CONFLICT"
-            else:
-                localRemainingClauses.append(clause)
-
-        self.satisfiedClausesStack.push(satisfiedClauses)
-        self.remainingClauses = localRemainingClauses
-
-        if len(self.remainingClauses) == 0:
-            return "SAT"
-
-        return "UNDETERMINED"
+        return status, variable, value

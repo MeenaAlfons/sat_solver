@@ -4,6 +4,7 @@
 
 import unittest
 from InMemoryMetrics import InMemoryMetrics
+import tests
 
 __author__ = "Meena Alfons"
 __copyright__ = "Copyright 2020, Knowledge Representation, SatSolver Project, Group 25"
@@ -22,7 +23,7 @@ class TestSatSolver(unittest.TestCase):
         """
         Test All cases for SatSolver
         """
-        tests = [{
+        testCases = [{
             "cnf": [[-1],[2]],
             "numOfVars": 2,
             "expectedResult": "SAT",
@@ -40,34 +41,12 @@ class TestSatSolver(unittest.TestCase):
         }]
 
         metrics = InMemoryMetrics()
-        for test in tests:
+        for test in testCases:
             solver = self.SatSolverClass(test["cnf"], test["numOfVars"], metrics)
             result, model = solver.solve()
             self.assertEqual(result, test["expectedResult"], test)
             if test["expectedResult"] == "SAT":
-                isSat, someDontCare = self.validate(test["cnf"], model)
+                isSat, someDontCare = tests.validateCnfModel(test["cnf"], model)
                 self.assertTrue(isSat, test)
                 self.assertEqual(test["expectDontCare"], someDontCare, test)
         metrics.print()
-
-
-    def validate(self, cnf, model):
-        someDontCare = False
-
-        for clause in cnf:
-            clauseIsSat = False
-            for literal in clause:
-                variable = abs(literal)
-                if variable in model:
-                    value = model[variable]
-                    literalValue = value if literal > 0 else not value
-                    if literalValue == True:
-                        clauseIsSat = True
-                        break
-                else:
-                    someDontCare = True
-
-            if clauseIsSat == False:
-                return False, someDontCare
-
-        return True, someDontCare

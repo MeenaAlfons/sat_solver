@@ -6,6 +6,8 @@ from SatSolverInterface import SatSolverInterface
 from InMemoryMetrics import InMemoryMetrics
 from BasicDPLL import BasicDPLL
 from dimacs_tools import load_dimacs, load_sudokus
+import tests
+import time
 
 from dimacs_tools import load_dimacs, load_sudokus
 
@@ -25,17 +27,22 @@ def main():
     cnf = rules + sudokus[0]
 
     solverSpecs = [{
-        "SolverClass": SatSolverInterface,
-    },{
         "SolverClass": BasicDPLL,
     }]
+
+    # cnf = [[1,2,3], [1,-2],[1,-3],[-1,3]]
+    # numOfVars = 3
 
     for solverSpec in solverSpecs:
         SolverClass = solverSpec["SolverClass"]
         metrics = InMemoryMetrics()
+        before = time.time()
         solver = SolverClass(cnf, numOfVars, metrics)
         result, model = solver.solve()
+        print("time={}".format(time.time()-before))
         print("result={}, model={}".format(result, model))
+        valid, someDontCare = tests.validateCnfModel(cnf, model)
+        print("valid={}, someDontCare={}".format(valid, someDontCare))
         metrics.print()
 
 

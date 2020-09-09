@@ -75,6 +75,7 @@ class CNFState():
         self.metrics = metrics
         self.remainingClauses = cnf
         self.assignmentStack = ListStack()
+        self.externalAssignmentStack = ListStack()
         self.satisfiedClausesStack = ListStack()
         self.model = {}
         self.status = "UNDETERMINED"
@@ -99,6 +100,7 @@ class CNFState():
 
 
         self.variablesClauseCount = {}
+        self.remaininVariables = {}
         for clause in cnf:
             for literal in clause:
                 variable = abs(literal)
@@ -106,24 +108,40 @@ class CNFState():
                     self.variablesClauseCount[variable] += 1
                 else:
                     self.variablesClauseCount[variable] = 1
+                    self.remaininVariables[variable] = True
+
+        self.unitPropagation()
 
 
     def getVariablesClauseCount(self):
         return self.variablesClauseCount
 
+    def getRemainingVariablesDict(self):
+        return self.remaininVariables
+
     def assignmentLength(self):
-        return len(self.assignmentStack)
+        return len(self.externalAssignmentStack)
 
     def getModel(self):
         return self.model
 
+    def getStatus(self):
+        return self.status
+
     def lastAssignment(self):
-        variable, value = self.assignmentStack.top()
-        return variable, value
+        variable, value, state = self.externalAssignmentStack.top()
+        return variable, value, state
 
     def pushAssignment(self, variable, value):
-        self.assignmentStack.push((variable, value))
+        self.externalAssignmentStack.push((variable, value, "BRANCH"))
+        self.pushAssignmentInternal(variable, value, "BRANCH")
+        self.unitPropagation()
+        return self.status, variable, value
+
+    def pushAssignmentInternal(self, variable, value, state):
+        self.assignmentStack.push((variable, value, state))
         self.model[variable] = value
+        self.remaininVariables.pop(variable, None)
 
         # we need to deduce
         self.deduceNewVariable(variable, value)
@@ -133,23 +151,21 @@ class CNFState():
     def flipLastAssignment(self):
         variable, value = self.popLastAssignment()
         value = not value
-        self.pushAssignment(variable, value)
+        self.pushAssignmentInternal(variable, value, "FLIPPED")
+        self.unitPropagation()
         return self.status, variable, value
 
     def backtrackUntilUnflipped(self):
-        poppedVariables = []
         while len(self.assignmentStack) > 0:
-            variable, _ = self.popLastAssignment()
-            poppedVariables.append(variable)
-            _, previousValue = self.assignmentStack.top()
-            #TODO we need to store something to know whether is variable is unflipped or not
-            if previousValue == False: # unflipped
+            _, _ = self.popLastAssignment()
+            _, _, state = self.assignmentStack.top()
+            if state == "BRANCH": # unflipped
                 break
 
         if len(self.assignmentStack) == 0:
             self.status = "UNSAT"
 
-        return self.status, poppedVariables
+        return self.status
 
     # The new variable is already added
     def deduceNewVariable(self, variable, value):
@@ -191,21 +207,55 @@ class CNFState():
         self.status = "UNDETERMINED"
 
     def popLastAssignment(self):
-        variable, value = self.assignmentStack.pop()
-        self.model.pop(variable, None)
-        if self.status != "CONFLICT":
-            variableSignedClauseIDs = self.variableSignedClausesDict[variable]
-            # For clauses inside remainingClausesHeap, their priority need to be increased
-            for signedClauseID in variableSignedClauseIDs:
-                clauseID = abs(signedClauseID)
-                if clauseID in self.remainingClausesHeap:
-                    self.remainingClausesHeap[clauseID] = self.remainingClausesHeap[clauseID] + 1
+        while True:
+            variable, value, state = self.assignmentStack.pop()
+            self.model.pop(variable, None)
+            self.remaininVariables[variable] = True
+            if self.status != "CONFLICT":
+                variableSignedClauseIDs = self.variableSignedClausesDict[variable]
+                # For clauses inside remainingClausesHeap, their priority need to be increased
+                for signedClauseID in variableSignedClauseIDs:
+                    clauseID = abs(signedClauseID)
+                    if clauseID in self.remainingClausesHeap:
+                        self.remainingClausesHeap[clauseID] = self.remainingClausesHeap[clauseID] + 1
 
-            # Then add previously satisfied clauses from satisfiedClausesStack
-            # which will come with the correct previous priority
-            satisfiedClausesPriorities = self.satisfiedClausesStack.pop()
-            for clauseID in satisfiedClausesPriorities:
-                self.remainingClausesHeap[clauseID] = satisfiedClausesPriorities[clauseID]
-
+                # Then add previously satisfied clauses from satisfiedClausesStack
+                # which will come with the correct previous priority
+                satisfiedClausesPriorities = self.satisfiedClausesStack.pop()
+                for clauseID in satisfiedClausesPriorities:
+                    self.remainingClausesHeap[clauseID] = satisfiedClausesPriorities[clauseID]
+            self.status = "UNDETERMINED"
+            if state != "UNIT":
+                self.externalAssignmentStack.pop()
+                break
         self.status = "UNDETERMINED"
         return variable, value
+
+    def unitPropagation(self):
+        # Unit Propagation
+        # /Find clause with the least number/ of unsatisfied literals
+        # if the number of unsatisfied literal is 1
+        # /Remove/ this clause, assign a proper value to the varialbe,
+        # Then go back to Deduce step
+        if self.status == "CONFLICT":
+            return
+
+        while len(self.remainingClausesHeap) > 0 and self.status != "CONFLICT":
+            clauseID, priority = self.remainingClausesHeap.peekitem()
+            if priority > 1:
+                break
+            self.metrics.incrementCounter("UnitPropagation")
+            clauseIdx = clauseID - 1
+            # Which variable is unassigned?
+            for literal in self.clauses[clauseIdx]:
+                variable = abs(literal)
+                if variable in self.model:
+                    pass
+                else:
+                    # unassigned variable
+                    # choose a value for it to satisfy the clause
+                    value = True if literal > 0 else False
+                    self.pushAssignmentInternal(variable, value, "UNIT")
+                    break
+
+        return

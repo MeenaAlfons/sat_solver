@@ -18,9 +18,6 @@ __email__ = "meena.kerolos@gmail.com"
 __status__ = "Development"
 
 class BasicDPLL(SatSolverInterface):
-    # The datastructure needed for DPLL will be represented
-    # in member variables
-
     # Assume cnf is an array of arrays
     def __init__(self, cnf, numOfVars, metrics):
         self.cnf = cnf
@@ -29,16 +26,10 @@ class BasicDPLL(SatSolverInterface):
 
     # Solve tries to find a satisfying assignment for
     # the CNF statement given in the constructor
-    #
-    # Preconditions:
-    # - self.remainingClauses: an array of clauses has unassigned variables
-    # - self.satisfiedClausesStack: a stack of satisfied clauses at each step
-    # - self.assignmentStack: a running stack of variable assignment
     def solve(self):
         if len(self.cnf) == 0:
             return self.SAT({})
 
-        # self.remainingVars = [i+1 for i in range(self.numOfVars)]
         self.cnfState = CNFState(self.cnf, self.numOfVars, self.metrics)
         variablesClauseCount = self.cnfState.getVariablesClauseCount()
         self.remainingVars = list(variablesClauseCount.keys())
@@ -46,8 +37,9 @@ class BasicDPLL(SatSolverInterface):
         ignoreChildBranches = False
         while True:
             self.metrics.incrementCounter("loop")
+
             # status = {CONFLICT, SAT, UNDETERMINED}
-            status, variable, value = self.chooseNextAssignment(ignoreChildBranches)
+            status, _, _ = self.chooseNextAssignment(ignoreChildBranches)
             ignoreChildBranches = False
             if status == "UNSAT":
                 return self.UNSAT()
@@ -72,7 +64,7 @@ class BasicDPLL(SatSolverInterface):
             # self.model[variable] = value
             status,variable,value = self.cnfState.pushAssignment(variable, value)
         else:
-            currentVariable, currentValue = self.cnfState.lastAssignment()
+            _, currentValue = self.cnfState.lastAssignment()
             # Here we have a three way decision:
             # 1. Go down the tree (add one more variable)
             # 2. Flip the current variable

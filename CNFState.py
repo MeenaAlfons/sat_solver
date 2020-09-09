@@ -117,6 +117,10 @@ class CNFState():
     def getModel(self):
         return self.model
 
+    def lastAssignment(self):
+        variable, value = self.assignmentStack.top()
+        return variable, value
+
     def pushAssignment(self, variable, value):
         self.assignmentStack.push((variable, value))
         self.model[variable] = value
@@ -130,18 +134,6 @@ class CNFState():
         variable, value = self.popLastAssignment()
         value = not value
         self.pushAssignment(variable, value)
-
-        # currentVariable, currentValue = self.assignmentStack.pop()
-        # variable = currentVariable
-        # value = not currentValue
-        # self.assignmentStack.push((variable, value))
-        # self.model[variable] = value
-
-        # we need to deduce
-        # Make sure to unwind the satisfiedClausesStack and push the newly satisfiedClauses
-        # more efficient ways could exist
-        # self.deduceFlip(variable, value)
-
         return self.status, variable, value
 
     def backtrackUntilUnflipped(self):
@@ -157,20 +149,7 @@ class CNFState():
         if len(self.assignmentStack) == 0:
             self.status = "UNSAT"
 
-        # Unwind the satisfiedClausesStack until it contains len(assignmentStack)-1
-        # while len(self.satisfiedClausesStack) > len(self.assignmentStack):
-        #     clauses = self.satisfiedClausesStack.pop()
-        #     self.remainingClauses.extend(clauses)
-
-        # No need to deduce this case because we did deduce it before.
-        # The caller will probably choose to flip this variable next.
-        # Status need to change to undertermined
-        # self.status = "UNDETERMINED"
         return self.status, poppedVariables
-
-    def lastAssignment(self):
-        variable, value = self.assignmentStack.top()
-        return variable, value
 
     # The new variable is already added
     def deduceNewVariable(self, variable, value):
@@ -210,25 +189,6 @@ class CNFState():
             return
 
         self.status = "UNDETERMINED"
-
-
-    # A last variable is already flipped
-    # def deduceFlip(self, variable, value):
-    #     if self.status != "CONFLICT":
-    #         variableSignedClauseIDs = self.variableSignedClausesDict[variable]
-    #         # For clauses inside remainingClausesHeap, their priority need to be increased
-    #         for signedClauseID in variableSignedClauseIDs:
-    #             clauseID = abs(signedClauseID)
-    #             if clauseID in self.remainingClausesHeap:
-    #                 self.remainingClausesHeap[clauseID] = self.remainingClausesHeap[clauseID] + 1
-
-    #         # Then add previously satisfied clauses from satisfiedClausesStack
-    #         # which will come with the correct previous priority
-    #         satisfiedClausesPriorities = self.satisfiedClausesStack.pop()
-    #         for clauseID in satisfiedClausesPriorities:
-    #             self.remainingClausesHeap[clauseID] = satisfiedClausesPriorities[clauseID]
-
-    #     self.deduceNewVariable(variable, value)
 
     def popLastAssignment(self):
         variable, value = self.assignmentStack.pop()

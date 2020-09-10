@@ -7,10 +7,6 @@ import time
 from ListStack import ListStack
 import heapdict
 
-h = heapdict.heapdict()
-
-
-
 __author__ = "Meena Alfons"
 __copyright__ = "Copyright 2020, Knowledge Representation, SatSolver Project, Group 25"
 __credits__ = ["Meena Alfons"]
@@ -148,6 +144,7 @@ class CNFState():
         return self.status, variable, value
 
     def flipLastAssignment(self):
+        self.metrics.incrementCounter("flip")
         variable, value = self.popLastAssignment()
         value = not value
         self.externalAssignmentStack.push((variable, value, "FLIPPED"))
@@ -156,6 +153,7 @@ class CNFState():
         return self.status, variable, value
 
     def backtrackUntilUnflipped(self):
+        self.metrics.incrementCounter("backtrack")
         while len(self.externalAssignmentStack) > 0:
             _, _ = self.popLastAssignment()
             if len(self.externalAssignmentStack) == 0 :

@@ -1,15 +1,14 @@
 #!/usr/bin/env python
 """Provides main function for testing SatSolvers
 """
+import time
+import statistics
 
 from SatSolverInterface import SatSolverInterface
 from InMemoryMetrics import InMemoryMetrics
 from BasicDPLL import BasicDPLL
 from dimacs_tools import load_dimacs, load_sudokus
-import tests
-import time
-
-from dimacs_tools import load_dimacs, load_sudokus
+import validation
 
 __author__ = "Meena Alfons"
 __copyright__ = "Copyright 2020, Knowledge Representation, SatSolver Project, Group 25"
@@ -34,22 +33,33 @@ def main():
 
     for solverSpec in solverSpecs:
         SolverClass = solverSpec["SolverClass"]
+        overallMetrics = InMemoryMetrics()
         for sudoku in sudokus:
-        # with sudoku = sudokus[5]:
             cnf = rules + sudoku
-            metrics = InMemoryMetrics()
-            before = time.time()
-            solver = SolverClass(cnf, numOfVars, metrics)
-            result, model = solver.solve()
-            print("time={}".format(time.time()-before))
-            # print("result={}, model={}".format(result, model))
-            print("result={}".format(result))
-            valid, someDontCare = tests.validateCnfModel(cnf, model)
-            print("valid={}, someDontCare={}".format(valid, someDontCare))
-            metrics.print()
-            if not valid:
-                raise "Not valid"
+            instanceMetrics = InMemoryMetrics()
 
+            before = time.time()
+            solver = SolverClass(cnf, numOfVars, instanceMetrics)
+            result, model = solver.solve()
+            totalTime = time.time()-before
+
+            overallMetrics.observeMany(instanceMetrics.getCounters())
+            overallMetrics.observe("totalTime", totalTime)
+            overallMetrics.observe("result", result)
+
+            before = time.time()
+            validCnf, someDontCare = validation.validateCnfModel(cnf, model)
+            validCnfTime = time.time()-before
+            overallMetrics.observe("someDontCare", someDontCare)
+            overallMetrics.observe("validCnf", validCnf)
+            overallMetrics.observe("validCnfTime", validCnfTime)
+
+            before = time.time()
+            validSudoku = validation.validateSudoku(model, 9)
+            validSudokuTime = time.time()-before
+            overallMetrics.observe("validSudoku", validSudoku)
+            overallMetrics.observe("validSudokuTime", validSudokuTime)
+        overallMetrics.printObservations()
 
 if __name__ == "__main__":
     main()

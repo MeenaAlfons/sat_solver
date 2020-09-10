@@ -31,8 +31,8 @@ class BasicDPLL(SatSolverInterface):
             return self.SAT({})
 
         self.cnfState = CNFState(self.cnf, self.numOfVars, self.metrics)
-        variablesClauseCount = self.cnfState.getVariablesClauseCount()
-        self.remainingVars = list(variablesClauseCount.keys())
+        if self.cnfState.getStatus() == "SAT":
+            return self.SAT(self.cnfState.getModel())
 
         ignoreChildBranches = False
         while True:
@@ -57,14 +57,13 @@ class BasicDPLL(SatSolverInterface):
                 pass
 
     def chooseNextAssignment(self, ignoreChildBranches):
+        remainingVariableDict = self.cnfState.getRemainingVariablesDict()
         if self.cnfState.assignmentLength() == 0:
-            variable = self.remainingVars.pop()
+            variable = next(iter(remainingVariableDict))
             value = False
-            # self.assignmentStack.push((variable, value))
-            # self.model[variable] = value
             status,variable,value = self.cnfState.pushAssignment(variable, value)
         else:
-            _, currentValue = self.cnfState.lastAssignment()
+            _, _, state = self.cnfState.lastAssignment()
             # Here we have a three way decision:
             # 1. Go down the tree (add one more variable)
             # 2. Flip the current variable
@@ -76,12 +75,12 @@ class BasicDPLL(SatSolverInterface):
             # 3. The length of the remainingVars
 
             action = ""
-            if currentValue == False:
+            if state == "BRANCH":
                 if ignoreChildBranches:
                     # Flip current variable
                     action = "FLIP"
                     pass
-                elif len(self.remainingVars) > 0:
+                elif len(remainingVariableDict) > 0:
                     # Go down = add one more variable
                     action = "DOWN"
                     pass
@@ -89,13 +88,13 @@ class BasicDPLL(SatSolverInterface):
                     # Flip current variable
                     action = "FLIP"
                     pass
-            else: # currentValue == True
+            else: # state == "FLIPPED"
                 if ignoreChildBranches:
                     # Go up until the first encountered unflipped variable
                     # Flip that variable
                     action = "UP"
                     pass
-                elif len(self.remainingVars) > 0:
+                elif len(remainingVariableDict) > 0:
                     # Go down = add one more variable
                     action = "DOWN"
                     pass
@@ -107,14 +106,13 @@ class BasicDPLL(SatSolverInterface):
             if action == "FLIP":
                 status,variable,value = self.cnfState.flipLastAssignment()
             elif action == "DOWN":
-                variable = self.remainingVars.pop()
+                variable = next(iter(remainingVariableDict))
                 value = False
-                status,variable,value = self.cnfState.pushAssignment(variable,value)
+                status, variable, value = self.cnfState.pushAssignment(variable,value)
             elif action == "UP":
-                status, popedVariables = self.cnfState.backtrackUntilUnflipped()
+                status = self.cnfState.backtrackUntilUnflipped()
                 if status == "UNSAT":
                     return "UNSAT", None, None
-                self.remainingVars.extend(popedVariables)
 
                 status, variable, value = self.cnfState.flipLastAssignment()
             else:

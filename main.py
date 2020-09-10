@@ -24,7 +24,6 @@ __status__ = "Development"
 def main():
     rules, numOfVars = load_dimacs('rules/sudoku_rules_9x9.txt')
     sudokus = load_sudokus('sudokus/1000_sudokus_9x9.txt')
-    cnf = rules + sudokus[0]
 
     solverSpecs = [{
         "SolverClass": BasicDPLL,
@@ -35,15 +34,21 @@ def main():
 
     for solverSpec in solverSpecs:
         SolverClass = solverSpec["SolverClass"]
-        metrics = InMemoryMetrics()
-        before = time.time()
-        solver = SolverClass(cnf, numOfVars, metrics)
-        result, model = solver.solve()
-        print("time={}".format(time.time()-before))
-        print("result={}, model={}".format(result, model))
-        valid, someDontCare = tests.validateCnfModel(cnf, model)
-        print("valid={}, someDontCare={}".format(valid, someDontCare))
-        metrics.print()
+        for sudoku in sudokus:
+        # with sudoku = sudokus[5]:
+            cnf = rules + sudoku
+            metrics = InMemoryMetrics()
+            before = time.time()
+            solver = SolverClass(cnf, numOfVars, metrics)
+            result, model = solver.solve()
+            print("time={}".format(time.time()-before))
+            # print("result={}, model={}".format(result, model))
+            print("result={}".format(result))
+            valid, someDontCare = tests.validateCnfModel(cnf, model)
+            print("valid={}, someDontCare={}".format(valid, someDontCare))
+            metrics.print()
+            if not valid:
+                raise "Not valid"
 
 
 if __name__ == "__main__":

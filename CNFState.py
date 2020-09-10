@@ -73,7 +73,6 @@ class CNFState():
     # - self.assignmentStack: a running stack of variable assignment
     def __init__(self, cnf, numOfVars, metrics):
         self.metrics = metrics
-        self.remainingClauses = cnf
         self.assignmentStack = ListStack()
         self.externalAssignmentStack = ListStack()
         self.satisfiedClausesStack = ListStack()
@@ -151,18 +150,21 @@ class CNFState():
     def flipLastAssignment(self):
         variable, value = self.popLastAssignment()
         value = not value
+        self.externalAssignmentStack.push((variable, value, "FLIPPED"))
         self.pushAssignmentInternal(variable, value, "FLIPPED")
         self.unitPropagation()
         return self.status, variable, value
 
     def backtrackUntilUnflipped(self):
-        while len(self.assignmentStack) > 0:
+        while len(self.externalAssignmentStack) > 0:
             _, _ = self.popLastAssignment()
-            _, _, state = self.assignmentStack.top()
+            if len(self.externalAssignmentStack) == 0 :
+                break
+            _, _, state = self.externalAssignmentStack.top()
             if state == "BRANCH": # unflipped
                 break
 
-        if len(self.assignmentStack) == 0:
+        if len(self.externalAssignmentStack) == 0:
             self.status = "UNSAT"
 
         return self.status
@@ -207,7 +209,7 @@ class CNFState():
         self.status = "UNDETERMINED"
 
     def popLastAssignment(self):
-        while True:
+        while len(self.assignmentStack) > 0:
             variable, value, state = self.assignmentStack.pop()
             self.model.pop(variable, None)
             self.remaininVariables[variable] = True
@@ -228,6 +230,7 @@ class CNFState():
             if state != "UNIT":
                 self.externalAssignmentStack.pop()
                 break
+
         self.status = "UNDETERMINED"
         return variable, value
 

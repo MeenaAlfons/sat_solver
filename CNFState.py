@@ -5,6 +5,7 @@
 import time
 
 from ListStack import ListStack
+from MaxPriorityDecorator import MaxPriorityDecorator
 import heapdict
 
 __author__ = "Meena Alfons"
@@ -67,7 +68,8 @@ class CNFState():
     # - self.remainingClauses: an array of clauses has unassigned variables
     # - self.satisfiedClausesStack: a stack of satisfied clauses at each step
     # - self.assignmentStack: a running stack of variable assignment
-    def __init__(self, cnf, numOfVars, metrics):
+    def __init__(self, cnf, numOfVars, plugins, metrics):
+        self.plugins = plugins
         self.metrics = metrics
         self.assignmentStack = ListStack()
         self.externalAssignmentStack = ListStack()
@@ -93,23 +95,21 @@ class CNFState():
                 else:
                     self.variableSignedClausesDict[variable] = [signedClauseID]
 
-
-        self.variablesClauseCount = {}
         self.remaininVariables = {}
         for clause in cnf:
             for literal in clause:
                 variable = abs(literal)
-                if variable in self.variablesClauseCount:
-                    self.variablesClauseCount[variable] += 1
-                else:
-                    self.variablesClauseCount[variable] = 1
-                    self.remaininVariables[variable] = True
+                self.remaininVariables[variable] = True
+
+        for plugin in self.plugins:
+            plugin.construct(self)
+
+        # TODO We need to make sure that every variable exists once in each clause
+        # if it exists twice with same polarity reduce one of them
+        # else status = UNSAT !!
 
         self.unitPropagation()
 
-
-    def getVariablesClauseCount(self):
-        return self.variablesClauseCount
 
     def getRemainingVariablesDict(self):
         return self.remaininVariables
@@ -137,6 +137,9 @@ class CNFState():
         self.assignmentStack.push((variable, value, state))
         self.model[variable] = value
         self.remaininVariables.pop(variable, None)
+
+        for plugin in self.plugins:
+            plugin.assignmentPushed(self, variable, value)
 
         # we need to deduce
         self.deduceNewVariable(variable, value)
@@ -195,6 +198,10 @@ class CNFState():
         for clauseID in satisfiedClauseIDs:
             satisfiedClausesPriorities[clauseID] = self.remainingClausesHeap[clauseID]
             self.remainingClausesHeap.pop(clauseID)
+
+        for plugin in self.plugins:
+            plugin.satisfiedClausesPushed(self, satisfiedClausesPriorities)
+
         self.satisfiedClausesStack.push(satisfiedClausesPriorities)
 
         for clauseID in newPriorities:
@@ -211,6 +218,10 @@ class CNFState():
             variable, value, state = self.assignmentStack.pop()
             self.model.pop(variable, None)
             self.remaininVariables[variable] = True
+
+            for plugin in self.plugins:
+                plugin.assignmentPoped(self, variable, value)
+
             if self.status != "CONFLICT":
                 variableSignedClauseIDs = self.variableSignedClausesDict[variable]
                 # For clauses inside remainingClausesHeap, their priority need to be increased
@@ -224,6 +235,10 @@ class CNFState():
                 satisfiedClausesPriorities = self.satisfiedClausesStack.pop()
                 for clauseID in satisfiedClausesPriorities:
                     self.remainingClausesHeap[clauseID] = satisfiedClausesPriorities[clauseID]
+
+                for plugin in self.plugins:
+                    plugin.satisfiedClausesPoped(self, satisfiedClausesPriorities)
+
             self.status = "UNDETERMINED"
             if state != "UNIT":
                 self.externalAssignmentStack.pop()

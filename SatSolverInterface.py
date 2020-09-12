@@ -27,4 +27,4 @@ class SatSolverInterface:
         return ("SAT", model)
 
     def UNSAT(self):
-        return ("UNSAT", None)
+        return ("UNSAT", {})

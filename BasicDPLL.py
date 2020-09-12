@@ -7,6 +7,7 @@ import time
 from SatSolverInterface import SatSolverInterface
 from CNFState import CNFState
 from ListStack import ListStack
+from DynamicLargestCombinedSum import DynamicLargestCombinedSum
 
 __author__ = "Meena Alfons"
 __copyright__ = "Copyright 2020, Knowledge Representation, SatSolver Project, Group 25"
@@ -30,7 +31,9 @@ class BasicDPLL(SatSolverInterface):
         if len(self.cnf) == 0:
             return self.SAT({})
 
-        self.cnfState = CNFState(self.cnf, self.numOfVars, self.metrics)
+        self.DynamicLargestCombinedSum = DynamicLargestCombinedSum()
+        plugins = [self.DynamicLargestCombinedSum]
+        self.cnfState = CNFState(self.cnf, self.numOfVars, plugins, self.metrics)
         if self.cnfState.getStatus() == "SAT":
             return self.SAT(self.cnfState.getModel())
 
@@ -118,6 +121,10 @@ class BasicDPLL(SatSolverInterface):
         return status, variable, value
 
     def chooseVarialeAndValue(self):
-        variable = next(iter(self.cnfState.getRemainingVariablesDict()))
-        value = False
+        # variable = next(iter(self.cnfState.getRemainingVariablesDict()))
+        # value = False
+
+        variable, value = self.DynamicLargestCombinedSum.chooseVariableAndValue(self.cnfState)
+
+        # print("{} {}".format(variable, value))
         return variable, value

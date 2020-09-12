@@ -9,6 +9,7 @@ from InMemoryMetrics import InMemoryMetrics
 from BasicDPLL import BasicDPLL
 from dimacs_tools import load_dimacs, load_sudokus
 import validation
+from DummyBranchDecision import DummyBranchDecision
 
 __author__ = "Meena Alfons"
 __copyright__ = "Copyright 2020, Knowledge Representation, SatSolver Project, Group 25"
@@ -39,7 +40,11 @@ def main():
             instanceMetrics = InMemoryMetrics()
 
             before = time.time()
-            solver = SolverClass(cnf, numOfVars, instanceMetrics)
+            solver = SolverClass(cnf,
+                numOfVars,
+                DummyBranchDecision(),
+                instanceMetrics
+            )
             result, model = solver.solve()
             totalTime = time.time()-before
 

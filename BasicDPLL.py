@@ -8,6 +8,7 @@ from SatSolverInterface import SatSolverInterface
 from CNFState import CNFState
 from ListStack import ListStack
 from DynamicLargestCombinedSum import DynamicLargestCombinedSum
+from DynamicLargestIndividualSum import DynamicLargestIndividualSum
 
 __author__ = "Meena Alfons"
 __copyright__ = "Copyright 2020, Knowledge Representation, SatSolver Project, Group 25"
@@ -20,10 +21,11 @@ __status__ = "Development"
 
 class BasicDPLL(SatSolverInterface):
     # Assume cnf is an array of arrays
-    def __init__(self, cnf, numOfVars, metrics):
+    def __init__(self, cnf, numOfVars, branchDecisionHeuristic, metrics):
         self.cnf = cnf
         self.numOfVars = numOfVars
         self.metrics = metrics
+        self.branchDecisionHeuristic = branchDecisionHeuristic
 
     # Solve tries to find a satisfying assignment for
     # the CNF statement given in the constructor
@@ -31,8 +33,9 @@ class BasicDPLL(SatSolverInterface):
         if len(self.cnf) == 0:
             return self.SAT({})
 
-        self.DynamicLargestCombinedSum = DynamicLargestCombinedSum()
-        plugins = [self.DynamicLargestCombinedSum]
+        plugins = [
+            self.branchDecisionHeuristic
+        ]
         self.cnfState = CNFState(self.cnf, self.numOfVars, plugins, self.metrics)
         if self.cnfState.getStatus() == "SAT":
             return self.SAT(self.cnfState.getModel())
@@ -61,7 +64,7 @@ class BasicDPLL(SatSolverInterface):
 
     def chooseNextAssignment(self, ignoreChildBranches):
         if self.cnfState.assignmentLength() == 0:
-            variable, value = self.chooseVarialeAndValue()
+            variable, value = self.branchDecisionHeuristic.chooseVariableAndValue(self.cnfState)
             status,variable,value = self.cnfState.pushAssignment(variable, value)
         else:
             _, _, state = self.cnfState.lastAssignment()
@@ -107,7 +110,7 @@ class BasicDPLL(SatSolverInterface):
             if action == "FLIP":
                 status,variable,value = self.cnfState.flipLastAssignment()
             elif action == "DOWN":
-                variable, value = self.chooseVarialeAndValue()
+                variable, value = self.branchDecisionHeuristic.chooseVariableAndValue(self.cnfState)
                 status, variable, value = self.cnfState.pushAssignment(variable,value)
             elif action == "UP":
                 status = self.cnfState.backtrackUntilUnflipped()
@@ -119,12 +122,3 @@ class BasicDPLL(SatSolverInterface):
                 raise "Not Implemented"
 
         return status, variable, value
-
-    def chooseVarialeAndValue(self):
-        # variable = next(iter(self.cnfState.getRemainingVariablesDict()))
-        # value = False
-
-        variable, value = self.DynamicLargestCombinedSum.chooseVariableAndValue(self.cnfState)
-
-        # print("{} {}".format(variable, value))
-        return variable, value

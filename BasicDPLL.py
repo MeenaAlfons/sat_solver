@@ -57,10 +57,8 @@ class BasicDPLL(SatSolverInterface):
                 pass
 
     def chooseNextAssignment(self, ignoreChildBranches):
-        remainingVariableDict = self.cnfState.getRemainingVariablesDict()
         if self.cnfState.assignmentLength() == 0:
-            variable = next(iter(remainingVariableDict))
-            value = False
+            variable, value = self.chooseVarialeAndValue()
             status,variable,value = self.cnfState.pushAssignment(variable, value)
         else:
             _, _, state = self.cnfState.lastAssignment()
@@ -80,7 +78,7 @@ class BasicDPLL(SatSolverInterface):
                     # Flip current variable
                     action = "FLIP"
                     pass
-                elif len(remainingVariableDict) > 0:
+                elif len(self.cnfState.getRemainingVariablesDict()) > 0:
                     # Go down = add one more variable
                     action = "DOWN"
                     pass
@@ -94,7 +92,7 @@ class BasicDPLL(SatSolverInterface):
                     # Flip that variable
                     action = "UP"
                     pass
-                elif len(remainingVariableDict) > 0:
+                elif len(self.cnfState.getRemainingVariablesDict()) > 0:
                     # Go down = add one more variable
                     action = "DOWN"
                     pass
@@ -106,8 +104,7 @@ class BasicDPLL(SatSolverInterface):
             if action == "FLIP":
                 status,variable,value = self.cnfState.flipLastAssignment()
             elif action == "DOWN":
-                variable = next(iter(remainingVariableDict))
-                value = False
+                variable, value = self.chooseVarialeAndValue()
                 status, variable, value = self.cnfState.pushAssignment(variable,value)
             elif action == "UP":
                 status = self.cnfState.backtrackUntilUnflipped()
@@ -119,3 +116,8 @@ class BasicDPLL(SatSolverInterface):
                 raise "Not Implemented"
 
         return status, variable, value
+
+    def chooseVarialeAndValue(self):
+        variable = next(iter(self.cnfState.getRemainingVariablesDict()))
+        value = False
+        return variable, value

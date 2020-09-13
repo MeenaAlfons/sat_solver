@@ -199,10 +199,10 @@ class CNFState():
             satisfiedClausesPriorities[clauseID] = self.remainingClausesHeap[clauseID]
             self.remainingClausesHeap.pop(clauseID)
 
-        for plugin in self.plugins:
-            plugin.satisfiedClausesPushed(self, satisfiedClausesPriorities)
-
         self.satisfiedClausesStack.push(satisfiedClausesPriorities)
+
+        for plugin in self.plugins:
+            plugin.satisfiedClausesPushed(self, variable, satisfiedClausesPriorities)
 
         for clauseID in newPriorities:
             self.remainingClausesHeap[clauseID] = newPriorities[clauseID]
@@ -237,7 +237,7 @@ class CNFState():
                     self.remainingClausesHeap[clauseID] = satisfiedClausesPriorities[clauseID]
 
                 for plugin in self.plugins:
-                    plugin.satisfiedClausesPoped(self, satisfiedClausesPriorities)
+                    plugin.satisfiedClausesPoped(self, variable, satisfiedClausesPriorities)
 
             self.status = "UNDETERMINED"
             if state != "UNIT":

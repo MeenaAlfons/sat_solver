@@ -21,8 +21,8 @@ class PluginInterface:
     def assignmentPoped(self, cnfState, variable, value):
         return
 
-    def satisfiedClausesPushed(self, cnfState, satisfiedClausesPriorities):
+    def satisfiedClausesPushed(self, cnfState, variable, satisfiedClausesPriorities):
         return
 
-    def satisfiedClausesPoped(self, cnfState, satisfiedClausesPriorities):
+    def satisfiedClausesPoped(self, cnfState, variable, satisfiedClausesPriorities):
         return

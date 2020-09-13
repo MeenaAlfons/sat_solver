@@ -10,6 +10,8 @@ from BasicDPLL import BasicDPLL
 from dimacs_tools import load_dimacs, load_sudokus
 import validation
 from DummyBranchDecision import DummyBranchDecision
+from DynamicLargestIndividualSum import DynamicLargestIndividualSum
+from DynamicLargestCombinedSum import DynamicLargestCombinedSum
 
 __author__ = "Meena Alfons"
 __copyright__ = "Copyright 2020, Knowledge Representation, SatSolver Project, Group 25"
@@ -42,7 +44,8 @@ def main():
             before = time.time()
             solver = SolverClass(cnf,
                 numOfVars,
-                DummyBranchDecision(),
+                DynamicLargestIndividualSum(True),
+                # DummyBranchDecision(),
                 instanceMetrics
             )
             result, model = solver.solve()

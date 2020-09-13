@@ -3,6 +3,7 @@
 """
 
 from PluginInterface import PluginInterface
+from ListStack import ListStack
 import heapdict
 
 __author__ = "Meena Alfons"
@@ -27,18 +28,32 @@ class VariableOccurrencesPlugin(PluginInterface):
         self.variablesPositiveClauseCount = heapdict.heapdict()
         self.variablesNegativeClauseCount = heapdict.heapdict()
         self.applyCountChanges(totalCount, positiveCount, negativeCount)
+
+        self.countStack = ListStack()
         return
 
     def assignmentPushed(self, cnfState, variable, value):
-        self.variablesClauseCount.pop(variable, None)
-        self.variablesPositiveClauseCount.pop(variable, None)
-        self.variablesNegativeClauseCount.pop(variable, None)
         return
 
     def assignmentPoped(self, cnfState, variable, value):
         return
 
-    def satisfiedClausesPushed(self, cnfState, satisfiedClausesPriorities):
+    def satisfiedClausesPushed(self, cnfState, assignedVariable, satisfiedClausesPriorities):
+        previousTotalCount = 0
+        previousPositiveCount = 0
+        previousNegativeCount = 0
+        if assignedVariable in self.variablesClauseCount:
+            previousTotalCount = self.variablesClauseCount[assignedVariable]
+        if assignedVariable in self.variablesPositiveClauseCount:
+            previousPositiveCount = self.variablesPositiveClauseCount[assignedVariable]
+        if assignedVariable in self.variablesNegativeClauseCount:
+            previousNegativeCount = self.variablesNegativeClauseCount[assignedVariable]
+        self.countStack.push((assignedVariable, previousTotalCount, previousPositiveCount, previousNegativeCount))
+
+        self.variablesClauseCount.pop(assignedVariable, None)
+        self.variablesPositiveClauseCount.pop(assignedVariable, None)
+        self.variablesNegativeClauseCount.pop(assignedVariable, None)
+
         totalCount = {}
         positiveCount = {}
         negativeCount = {}
@@ -46,12 +61,18 @@ class VariableOccurrencesPlugin(PluginInterface):
             clauseIdx = clauseID-1
             clause = cnfState.clauses[clauseIdx]
             for literal in clause:
-                self.decreaseLiteralCount(literal, totalCount, positiveCount, negativeCount)
+                variable = abs(literal)
+                if variable != assignedVariable:
+                    self.decreaseLiteralCount(literal, totalCount, positiveCount, negativeCount)
 
         self.applyCountChanges(totalCount, positiveCount, negativeCount)
+
+        variable, _, _ = cnfState.assignmentStack.top()
+        # if variable in self.variablesClauseCount:
+        #     print ("variable {} still exists priority={}".format(variable, self.variablesClauseCount[variable]))
         return
 
-    def satisfiedClausesPoped(self, cnfState, satisfiedClausesPriorities):
+    def satisfiedClausesPoped(self, cnfState, assignedVariable, satisfiedClausesPriorities):
         totalCount = {}
         positiveCount = {}
         negativeCount = {}
@@ -61,10 +82,21 @@ class VariableOccurrencesPlugin(PluginInterface):
             for literal in clause:
                 innerVariable = abs(literal)
                 # Not all variables in the returned clause are remaining variable
-                if innerVariable in cnfState.remaininVariables:
+                if innerVariable in cnfState.remaininVariables and innerVariable != assignedVariable:
                     self.increaseLiteralCount(literal, totalCount, positiveCount, negativeCount)
 
         self.applyCountChanges(totalCount, positiveCount, negativeCount)
+
+        variable1, previousTotalCount, previousPositiveCount, previousNegativeCount = self.countStack.pop()
+        if variable1 != assignedVariable:
+            raise "Something is wrong"
+
+        if previousTotalCount != 0:
+            self.variablesClauseCount[assignedVariable] = previousTotalCount
+        if previousPositiveCount != 0:
+            self.variablesPositiveClauseCount[assignedVariable] = previousPositiveCount
+        if previousNegativeCount != 0:
+            self.variablesNegativeClauseCount[assignedVariable] = previousNegativeCount
         return
 
     def increaseLiteralCount(self, literal, totalDict, positiveDict, negativeDict):

@@ -24,10 +24,12 @@ class DynamicLargestIndividualSum(BranchDecisionHeuristicInterface, VariableOccu
         negativeCount = 0
         if self.positive:
             variable, positiveCount = self.variablesPositiveClauseCount.peekitem()
+            positiveCount = - positiveCount
             if variable in self.variablesNegativeClauseCount:
                 negativeCount = -self.variablesNegativeClauseCount[variable]
         else:
             variable, negativeCount = self.variablesNegativeClauseCount.peekitem()
+            negativeCount = - negativeCount
             if variable in self.variablesPositiveClauseCount:
                 positiveCount = -self.variablesPositiveClauseCount[variable]
 

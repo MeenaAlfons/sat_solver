@@ -139,6 +139,7 @@ class SudokuRules:
         dimacs = ""
 
         # first line with parameters
+        # this will only work for 4*4 and 9*9 sudokus
         n_vars = str(self.sudoku_size)*3
         clauses = str(len(self.rules_cnf))
         dimacs += "p cnf " + n_vars + " " + clauses + "\n"
@@ -147,6 +148,5 @@ class SudokuRules:
         for c in self.rules_cnf:
             dimacs += str(c).replace(",", "")[1:-1] + " 0\n"
 
-        print(dimacs)
         with open(filename, 'w+') as f:
             f.write(dimacs)

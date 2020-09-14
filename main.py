@@ -45,6 +45,7 @@ def main():
             solver = SolverClass(cnf,
                 numOfVars,
                 DynamicLargestIndividualSum(True),
+                # DynamicLargestCombinedSum(),
                 # DummyBranchDecision(),
                 instanceMetrics
             )

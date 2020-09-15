@@ -12,6 +12,7 @@ import validation
 from DummyBranchDecision import DummyBranchDecision
 from DynamicLargestIndividualSum import DynamicLargestIndividualSum
 from DynamicLargestCombinedSum import DynamicLargestCombinedSum
+from JeroslowWangOneSided import JeroslowWangOneSided
 
 __author__ = "Meena Alfons"
 __copyright__ = "Copyright 2020, Knowledge Representation, SatSolver Project, Group 25"
@@ -44,9 +45,10 @@ def main():
             before = time.time()
             solver = SolverClass(cnf,
                 numOfVars,
-                DynamicLargestIndividualSum(True),
+                # DynamicLargestIndividualSum(True),
+                # JeroslowWangOneSided(),
                 # DynamicLargestCombinedSum(),
-                # DummyBranchDecision(),
+                DummyBranchDecision(),
                 instanceMetrics
             )
             result, model = solver.solve()

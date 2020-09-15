@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Provides VariableCountPlugin
+"""Provides JeroslowWangPlugin
 """
 
 from PluginInterface import PluginInterface
@@ -15,17 +15,18 @@ __maintainer__ = "Meena Alfons"
 __email__ = "meena.kerolos@gmail.com"
 __status__ = "Development"
 
-class VariableCountPlugin(PluginInterface):
+class JeroslowWangPlugin(PluginInterface):
     def construct(self, cnfState):
-        literalCount = {}
+        literalScore = {}
         for clause in cnfState.clauses:
+            clauseScore = pow(2,-len(clause))
             for literal in clause:
-                if literal in literalCount:
-                    literalCount[literal] += 1
+                if literal in literalScore:
+                    literalScore[literal] += clauseScore
                 else:
-                    literalCount[literal] = 1
+                    literalScore[literal] = clauseScore
 
-        self.initCounts(literalCount)
+        self.initCounts(literalScore)
         pass
 
     def satisfiedClausesPushed(self, cnfState, assignedVariable, satisfiedClausesPriorities):
@@ -35,19 +36,20 @@ class VariableCountPlugin(PluginInterface):
         # no need to decrease assignedVarialbe
         # no need to decrease variable that currently does not exist in remaining variables
 
-        literalCount = {}
+        literalScore = {}
         for clauseID in satisfiedClausesPriorities:
             clauseIdx = clauseID-1
             clause = cnfState.clauses[clauseIdx]
+            clauseScore = pow(2, -len(clause))
             for literal in clause:
                 variable = abs(literal)
                 if variable != assignedVariable and variable in cnfState.getRemainingVariablesDict():
-                    if literal in literalCount:
-                        literalCount[literal] += 1
+                    if literal in literalScore:
+                        literalScore[literal] += clauseScore
                     else:
-                        literalCount[literal] = 1
+                        literalScore[literal] = clauseScore
 
-        self.pushCurrentCountsAndDecrease(assignedVariable, literalCount)
+        self.pushCurrentCountsAndDecrease(assignedVariable, literalScore)
         return
 
     def satisfiedClausesPoped(self, cnfState, assignedVariable, satisfiedClausesPriorities):

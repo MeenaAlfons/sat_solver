@@ -59,7 +59,7 @@ def validateSudoku(sudokuModel, size):
         for col in range(size):
             valMask = 1 << sudoku[row][col]
             if valMask & bitVector:
-                return "Value exists twice"
+                return "Value exists twice in row"
             bitVector |= valMask
         if bitVector != 0b1111111110:
             return "Something is wrong"
@@ -69,7 +69,7 @@ def validateSudoku(sudokuModel, size):
         for col in range(size):
             valMask = 1 << sudoku[row][col]
             if valMask & bitVector:
-                return "Value exists twice"
+                return "Value exists twice in col"
             bitVector |= valMask
         if bitVector != 0b1111111110:
             return "Something is wrong"
@@ -82,7 +82,7 @@ def validateSudoku(sudokuModel, size):
             colIdx = (box % boxSize) * boxSize + element % boxSize
             valMask = 1 << sudoku[rowIdx][colIdx]
             if valMask & bitVector:
-                return "Value exists twice"
+                return "Value exists twice in block"
             bitVector |= valMask
         if bitVector != 0b1111111110:
             return "Something is wrong"

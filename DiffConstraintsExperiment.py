@@ -49,21 +49,25 @@ class DiffConstraintsExperiment:
 
     def generateRules(self, numOfConstraints):
         rulesDict = {}
+        # the following nested loop go throw all the combinations of rows, cols, blocks
+        # Where each one of them could have values from 0 to 9
+        # However the script only considers combinations which add up to the numOfConstraints
+        # Example combinations when numOfConstraints=7:
+        # row=0 col=0 blocks=7
+        # row=1 col=3 blocks=3
+        # row=6 col=0 blocks=1
         for row in range(9+1):
             if row == numOfConstraints:
-                # do something
                 name, rules = self.rulesOf(row, 0, 0)
                 rulesDict[name] = rules
                 break
             for col in range(9+1):
                 if row + col == numOfConstraints:
-                    # do something
                     name, rules = self.rulesOf(row, col, 0)
                     rulesDict[name] = rules
                     break
                 for block in range(9+1):
                     if row + col + block == numOfConstraints:
-                        # do something
                         name, rules = self.rulesOf(row, col, block)
                         rulesDict[name] = rules
                         break

@@ -150,3 +150,6 @@ class SudokuRules:
 
         with open(filename, 'w+') as f:
             f.write(dimacs)
+
+    def getRules(self):
+        return self.rules_cnf

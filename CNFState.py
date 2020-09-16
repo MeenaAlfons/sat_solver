@@ -260,7 +260,7 @@ class CNFState():
             clauseID, priority = self.remainingClausesHeap.peekitem()
             if priority > 1:
                 break
-            self.metrics.incrementCounter("UnitPropagation")
+            self.metrics.incrementCounter("unit")
             clauseIdx = clauseID - 1
             # Which variable is unassigned?
             for literal in self.clauses[clauseIdx]:

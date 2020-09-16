@@ -145,5 +145,5 @@ if __name__ == "__main__":
 
     before = time.time()
     experiment = DiffConstraintsExperiment()
-    experiment.run(numOfContraints, [start, end])
+    experiment.run(numOfContraints, start, end)
     print("time={} seconds".format(time.time()-before))

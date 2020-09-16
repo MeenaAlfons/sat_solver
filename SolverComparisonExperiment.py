@@ -96,5 +96,5 @@ if __name__ == "__main__":
 
     before = time.time()
     experiment = SolverComparisonExperiment()
-    experiment.run([start, end])
+    experiment.run(start, end)
     print("time={} seconds".format(time.time()-before))

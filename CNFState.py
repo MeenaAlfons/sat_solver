@@ -5,7 +5,6 @@
 import time
 
 from ListStack import ListStack
-from MaxPriorityDecorator import MaxPriorityDecorator
 import heapdict
 
 __author__ = "Meena Alfons"

@@ -49,6 +49,7 @@ def main():
                 # JeroslowWangOneSided(),
                 # DynamicLargestCombinedSum(),
                 DummyBranchDecision(),
+                -1,
                 instanceMetrics
             )
             result, model = solver.solve()

@@ -21,11 +21,12 @@ __status__ = "Development"
 
 class BasicDPLL(SatSolverInterface):
     # Assume cnf is an array of arrays
-    def __init__(self, cnf, numOfVars, branchDecisionHeuristic, metrics):
+    def __init__(self, cnf, numOfVars, branchDecisionHeuristic, timeout, metrics):
         self.cnf = cnf
         self.numOfVars = numOfVars
         self.metrics = metrics
         self.branchDecisionHeuristic = branchDecisionHeuristic
+        self.timeout = timeout
 
     # Solve tries to find a satisfying assignment for
     # the CNF statement given in the constructor
@@ -41,7 +42,12 @@ class BasicDPLL(SatSolverInterface):
             return self.SAT(self.cnfState.getModel())
 
         ignoreChildBranches = False
+        before = time.time()
+        counter = 0
         while True:
+            counter += 1
+            if self.timeout > 0 and counter %1000 == 999 and time.time() - before >= self.timeout:
+                return self.TIMEOUT()
             self.metrics.incrementCounter("loop")
 
             # status = {CONFLICT, SAT, UNDETERMINED}

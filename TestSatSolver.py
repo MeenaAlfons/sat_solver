@@ -4,7 +4,8 @@
 
 import unittest
 from InMemoryMetrics import InMemoryMetrics
-import tests
+from DummyBranchDecision import DummyBranchDecision
+import validation
 
 __author__ = "Meena Alfons"
 __copyright__ = "Copyright 2020, Knowledge Representation, SatSolver Project, Group 25"
@@ -42,11 +43,10 @@ class TestSatSolver(unittest.TestCase):
 
         metrics = InMemoryMetrics()
         for test in testCases:
-            solver = self.SatSolverClass(test["cnf"], test["numOfVars"], metrics)
+            solver = self.SatSolverClass(test["cnf"], test["numOfVars"], DummyBranchDecision(), -1, metrics)
             result, model = solver.solve()
             self.assertEqual(result, test["expectedResult"], test)
             if test["expectedResult"] == "SAT":
-                isSat, someDontCare = tests.validateCnfModel(test["cnf"], model)
+                isSat, someDontCare = validation.validateCnfModel(test["cnf"], model)
                 self.assertTrue(isSat, test)
                 self.assertEqual(test["expectDontCare"], someDontCare, test)
-        metrics.print()

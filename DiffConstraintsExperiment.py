@@ -74,7 +74,7 @@ class DiffConstraintsExperiment:
 
         return rulesDict
 
-    def run(self, numOfConstraints, start = 0, end = 1011):
+    def run(self, numOfConstraints, timeout, start = 0, end = 1011):
         decisionHeuristicFactory = lambda: DummyBranchDecision()
 
         rules, numOfVars = load_dimacs('rules/sudoku_rules_9x9.txt')
@@ -97,11 +97,14 @@ class DiffConstraintsExperiment:
                 solver = BasicDPLL(cnf,
                     numOfVars,
                     decisionHeuristicFactory(),
+                    timeout,
                     instanceMetrics
                 )
                 result, _ = solver.solve()
                 totalTime = time.time()-before
                 counters = instanceMetrics.getCounters()
+                if result == "TIMEOUT":
+                    print("T", end='', flush=True)
                 data.append((
                     sudokuID,
                     name,
@@ -137,13 +140,19 @@ if __name__ == "__main__":
                         type=int,
                         help='end',
                         default=1011)
+    parser.add_argument('--timeout',
+                        metavar='timeout',
+                        type=float,
+                        help='timeout',
+                        default=900)
     args = parser.parse_args()
     numOfContraints = args.numOfContraints
     start = args.start
     end = args.end
-    print("numOfConstraints={}, start={}, end={}".format(numOfContraints, start, end))
+    timeout = args.timeout
+    print("numOfConstraints={}, timeout={}, start={}, end={}".format(numOfContraints, timeout, start, end))
 
     before = time.time()
     experiment = DiffConstraintsExperiment()
-    experiment.run(numOfContraints, start, end)
+    experiment.run(numOfContraints, timeout, start, end)
     print("time={} seconds".format(time.time()-before))

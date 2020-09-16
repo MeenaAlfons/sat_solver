@@ -54,6 +54,7 @@ class SolverComparisonExperiment:
                 solver = BasicDPLL(cnf,
                     numOfVars,
                     decisionHeuristicFactory(),
+                    -1,
                     instanceMetrics
                 )
                 result, _ = solver.solve()

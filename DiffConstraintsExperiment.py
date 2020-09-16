@@ -74,11 +74,11 @@ class DiffConstraintsExperiment:
 
         return rulesDict
 
-    def run(self, numOfConstraints, sudokuRange = [0,1011]):
+    def run(self, numOfConstraints, start = 0, end = 1011):
         decisionHeuristicFactory = lambda: DummyBranchDecision()
 
         rules, numOfVars = load_dimacs('rules/sudoku_rules_9x9.txt')
-        sudokus = load_sudokus('sudokus/1000_sudokus_9x9.txt')[sudokuRange[0]:sudokuRange[1]]
+        sudokus = load_sudokus('sudokus/1000_sudokus_9x9.txt')[start:end]
         data = []
 
         rulesDict = self.generateRules(numOfConstraints)

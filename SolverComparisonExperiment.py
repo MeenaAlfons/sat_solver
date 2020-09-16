@@ -27,7 +27,7 @@ __email__ = "meena.kerolos@gmail.com"
 __status__ = "Development"
 
 class SolverComparisonExperiment:
-    def run(self, sudokuRange = [0,1011]):
+    def run(self, start = 0, end = 1011):
         decisionHeuristicFactories = {
             "DLIS(True)": lambda: DynamicLargestIndividualSum(True),
             "DLIS(False)": lambda: DynamicLargestIndividualSum(False),
@@ -37,7 +37,7 @@ class SolverComparisonExperiment:
         }
 
         rules, numOfVars = load_dimacs('rules/sudoku_rules_9x9.txt')
-        sudokus = load_sudokus('sudokus/1000_sudokus_9x9.txt')[sudokuRange[0]:sudokuRange[1]]
+        sudokus = load_sudokus('sudokus/1000_sudokus_9x9.txt')[start:end]
         data = []
 
         for i in range(len(sudokus)):

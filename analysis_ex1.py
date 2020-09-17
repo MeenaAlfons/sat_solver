@@ -1,7 +1,7 @@
 import pandas
 from pandas import DataFrame
 from matplotlib import pyplot as plt
-from scipy.stats import shapiro
+from scipy.stats import shapiro, friedmanchisquare
 
 # set true if you want to plot stuff
 plotting = False
@@ -37,7 +37,7 @@ if plotting:
         col = df.columns.values
         boxplot = df.boxplot(column=['DLIS(True)','DLIS(False)', 'JW-OS', 'DLCS', 'HERO'])
         plt.title(curr_data)
-        plt.ylim(0, 1000)
+        plt.ylim(0, 650)
         plt.show()
 
 #Analysis of normality for the data: (none is normally distributed)
@@ -46,3 +46,13 @@ for curr_data in split_data:
     for solver in split_data[curr_data].columns.values:
         print('Normality test for ' + solver)
         print(shapiro(loop_data[solver]))
+
+# Is there at least one solver which is significantly better?
+# -> The performances are significantly different with p approx. 0
+for curr_data in split_data:
+    print('\n' + curr_data + ' friedman test:')
+    print(friedmanchisquare(split_data[curr_data]['DLIS(True)'],
+                            split_data[curr_data]['DLIS(False)'],
+                            split_data[curr_data]['JW-OS'],
+                            split_data[curr_data]['DLCS'],
+                            split_data[curr_data]['HERO'])) #'DLIS(False)', 'JW-OS', 'DLCS', 'HERO']))

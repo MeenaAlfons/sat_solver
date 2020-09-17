@@ -1,6 +1,7 @@
 import pandas
 from pandas import DataFrame
 from matplotlib import pyplot as plt
+from scipy.stats import shapiro
 
 # set true if you want to plot stuff
 plotting = False
@@ -39,5 +40,9 @@ if plotting:
         plt.ylim(0, 1000)
         plt.show()
 
-
-print(loop_data)
+#Analysis of normality for the data: (none is normally distributed)
+for curr_data in split_data:
+    print('\n' + curr_data + ' data:')
+    for solver in split_data[curr_data].columns.values:
+        print('Normality test for ' + solver)
+        print(shapiro(loop_data[solver]))

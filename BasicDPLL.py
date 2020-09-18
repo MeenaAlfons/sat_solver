@@ -21,19 +21,31 @@ __status__ = "Development"
 
 class BasicDPLL(SatSolverInterface):
     # Assume cnf is an array of arrays
-    def __init__(self, cnf, numOfVars, branchDecisionHeuristic, timeout, metrics):
+    def __init__(self, cnf, numOfVars, branchDecisionHeuristicFactory, timeout, restarts, metrics):
         self.cnf = cnf
         self.numOfVars = numOfVars
         self.metrics = metrics
-        self.branchDecisionHeuristic = branchDecisionHeuristic
+        self.branchDecisionHeuristicFactory = branchDecisionHeuristicFactory
         self.timeout = timeout
+        self.restarts = restarts
 
     # Solve tries to find a satisfying assignment for
     # the CNF statement given in the constructor
     def solve(self):
+        currentRun = 0
+        while True:
+            result, model = self.solveInternal()
+            if result == "TIMEOUT" and currentRun < self.restarts:
+                self.metrics.incrementCounter("restarts")
+                currentRun += 1
+            else:
+                return result,model
+
+    def solveInternal(self):
         if len(self.cnf) == 0:
             return self.SAT({})
 
+        self.branchDecisionHeuristic = self.branchDecisionHeuristicFactory()
         plugins = [
             self.branchDecisionHeuristic
         ]
@@ -90,7 +102,7 @@ class BasicDPLL(SatSolverInterface):
                     # Flip current variable
                     action = "FLIP"
                     pass
-                elif len(self.cnfState.getRemainingVariablesDict()) > 0:
+                elif len(self.cnfState.getRemainingVariablesSet()) > 0:
                     # Go down = add one more variable
                     action = "DOWN"
                     pass
@@ -104,7 +116,7 @@ class BasicDPLL(SatSolverInterface):
                     # Flip that variable
                     action = "UP"
                     pass
-                elif len(self.cnfState.getRemainingVariablesDict()) > 0:
+                elif len(self.cnfState.getRemainingVariablesSet()) > 0:
                     # Go down = add one more variable
                     action = "DOWN"
                     pass

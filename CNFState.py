@@ -94,11 +94,11 @@ class CNFState():
                 else:
                     self.variableSignedClausesDict[variable] = [signedClauseID]
 
-        self.remaininVariables = {}
+        self.remainingVariablesSet = set([])
         for clause in cnf:
             for literal in clause:
                 variable = abs(literal)
-                self.remaininVariables[variable] = True
+                self.remainingVariablesSet.add(variable)
 
         for plugin in self.plugins:
             plugin.construct(self)
@@ -110,8 +110,8 @@ class CNFState():
         self.unitPropagation()
 
 
-    def getRemainingVariablesDict(self):
-        return self.remaininVariables
+    def getRemainingVariablesSet(self):
+        return self.remainingVariablesSet
 
     def assignmentLength(self):
         return len(self.externalAssignmentStack)
@@ -135,7 +135,10 @@ class CNFState():
     def pushAssignmentInternal(self, variable, value, state):
         self.assignmentStack.push((variable, value, state))
         self.model[variable] = value
-        self.remaininVariables.pop(variable, None)
+        if variable in self.remainingVariablesSet:
+            self.remainingVariablesSet.remove(variable)
+        else:
+            print("Not in set")
 
         for plugin in self.plugins:
             plugin.assignmentPushed(self, variable, value)
@@ -216,7 +219,7 @@ class CNFState():
         while len(self.assignmentStack) > 0:
             variable, value, state = self.assignmentStack.pop()
             self.model.pop(variable, None)
-            self.remaininVariables[variable] = True
+            self.remainingVariablesSet.add(variable)
 
             for plugin in self.plugins:
                 plugin.assignmentPoped(self, variable, value)

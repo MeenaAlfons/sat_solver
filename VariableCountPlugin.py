@@ -41,7 +41,7 @@ class VariableCountPlugin(PluginInterface):
             clause = cnfState.clauses[clauseIdx]
             for literal in clause:
                 variable = abs(literal)
-                if variable != assignedVariable and variable in cnfState.getRemainingVariablesDict():
+                if variable != assignedVariable and variable in cnfState.getRemainingVariablesSet():
                     if literal in literalCount:
                         literalCount[literal] += 1
                     else:

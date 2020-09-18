@@ -50,6 +50,7 @@ def main():
                 # DynamicLargestCombinedSum(),
                 DummyBranchDecision(),
                 -1,
+                0,
                 instanceMetrics
             )
             result, model = solver.solve()

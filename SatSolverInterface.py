@@ -12,7 +12,7 @@ __email__ = "meena.kerolos@gmail.com"
 __status__ = "Development"
 
 class SatSolverInterface:
-    def __init__(self, cnf, numOfVars, branchDecisionHeuristic, timeout, metrics):
+    def __init__(self, cnf, numOfVars, branchDecisionHeuristic, timeout, restarts, metrics):
         # Assume cnf is an array of arrays
         print("SatInterface constructor not implemented")
         pass

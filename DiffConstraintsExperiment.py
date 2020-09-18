@@ -9,9 +9,7 @@ import argparse
 
 from BasicDPLL import BasicDPLL
 from DummyBranchDecision import DummyBranchDecision
-from DynamicLargestCombinedSum import DynamicLargestCombinedSum
-from DynamicLargestIndividualSum import DynamicLargestIndividualSum
-from JeroslowWangOneSided import JeroslowWangOneSided
+from RandomFalseBranchDecision import RandomFalseBranchDecision
 
 from dimacs_tools import load_dimacs, load_sudokus
 from InMemoryMetrics import InMemoryMetrics
@@ -75,7 +73,7 @@ class DiffConstraintsExperiment:
         return rulesDict
 
     def run(self, numOfConstraints, timeout, start = 0, end = 1011):
-        decisionHeuristicFactory = lambda: DummyBranchDecision()
+        decisionHeuristicFactory = lambda:  DummyBranchDecision()#RandomFalseBranchDecision()
 
         rules, numOfVars = load_dimacs('rules/sudoku_rules_9x9.txt')
         sudokus = load_sudokus('sudokus/1000_sudokus_9x9.txt')[start:end]
@@ -84,7 +82,7 @@ class DiffConstraintsExperiment:
         rulesDict = self.generateRules(numOfConstraints)
 
         for i in range(len(sudokus)):
-            if i % 10 == 5:
+            if i % 10 == 9:
                 print(".", end='', flush=True)
             sudoku = sudokus[i]
             sudokuID = i + 1
@@ -96,8 +94,9 @@ class DiffConstraintsExperiment:
                 before = time.time()
                 solver = BasicDPLL(cnf,
                     numOfVars,
-                    decisionHeuristicFactory(),
+                    decisionHeuristicFactory,
                     timeout,
+                    5,
                     instanceMetrics
                 )
                 result, _ = solver.solve()
@@ -144,7 +143,7 @@ if __name__ == "__main__":
                         metavar='timeout',
                         type=float,
                         help='timeout',
-                        default=900)
+                        default=5)
     args = parser.parse_args()
     numOfContraints = args.numOfContraints
     start = args.start

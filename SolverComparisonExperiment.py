@@ -53,8 +53,9 @@ class SolverComparisonExperiment:
                 before = time.time()
                 solver = BasicDPLL(cnf,
                     numOfVars,
-                    decisionHeuristicFactory(),
+                    decisionHeuristicFactory,
                     -1,
+                    0,
                     instanceMetrics
                 )
                 result, _ = solver.solve()

@@ -43,7 +43,7 @@ class TestSatSolver(unittest.TestCase):
 
         metrics = InMemoryMetrics()
         for test in testCases:
-            solver = self.SatSolverClass(test["cnf"], test["numOfVars"], DummyBranchDecision(), -1, metrics)
+            solver = self.SatSolverClass(test["cnf"], test["numOfVars"], DummyBranchDecision, -1, 0, metrics)
             result, model = solver.solve()
             self.assertEqual(result, test["expectedResult"], test)
             if test["expectedResult"] == "SAT":

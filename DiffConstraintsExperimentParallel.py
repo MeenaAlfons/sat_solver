@@ -163,6 +163,6 @@ if __name__ == "__main__":
     print("numOfConstraints={}, timeout={}, start={}, end={}".format(numOfContraints, timeout, start, end))
 
     before = time.time()
-    experiment = DiffConstraintsExperiment()
+    experiment = DiffConstraintsExperimentParallel()
     experiment.run(numOfContraints, timeout, start, end)
     print("time={} seconds".format(time.time()-before))

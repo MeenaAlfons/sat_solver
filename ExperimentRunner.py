@@ -33,7 +33,7 @@ class ExperimentRunner:
         inputValues = []
         for i in range(len(sudokus)):
             sudoku = sudokus[i]
-            sudokuID = i + 1
+            sudokuID = start + i + 1
             inputValues.append((sudokuID, sudoku, rulesDict, timeout))
 
         print("cpu_count={}".format(mp.cpu_count()))

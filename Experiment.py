@@ -53,3 +53,39 @@ def processOneSudoku(sudokuID, sudoku, rulesDict, timeout):
         ))
     print(".", end='', flush=True)
     return data
+
+heuristicDataHeader = ["sudokuID", "name", "result", "totalTime", "loop", "backtrack", "flip", "unit"]
+
+def processOneSudokuWithHeuristic(sudokuID, sudoku, rules, heuristicDict):
+    numOfVars = 9
+    data = []
+    for name in heuristicDict:
+        decisionHeuristicFactory = heuristicDict[name]
+        cnf = rules + sudoku
+        instanceMetrics = InMemoryMetrics()
+
+        before = time.time()
+        solver = BasicDPLL(cnf,
+            numOfVars,
+            decisionHeuristicFactory,
+            -1,
+            0,
+            instanceMetrics
+        )
+        result, _ = solver.solve()
+        totalTime = time.time()-before
+        counters = instanceMetrics.getCounters()
+        if result == "TIMEOUT":
+            print("T", end='', flush=True)
+        data.append((
+            sudokuID,
+            name,
+            result,
+            totalTime,
+            counters.get("loop", 0),
+            counters.get("backtrack", 0),
+            counters.get("flip", 0),
+            counters.get("unit", 0),
+        ))
+    print(".", end='', flush=True)
+    return data

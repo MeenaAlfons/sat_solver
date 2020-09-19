@@ -61,7 +61,7 @@ def processOneSudoku(sudokuID, sudoku, rulesDict, numOfConstraints, timeout):
     print(".", end='', flush=True)
     return data
 
-class DiffConstraintsExperiment:
+class DiffConstraintsExperimentParallel:
     def __init__(self):
         self.rulesCreator = SudokuRules(9)
 

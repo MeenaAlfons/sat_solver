@@ -62,8 +62,7 @@ def processOneSudoku(sudokuID, sudoku, rulesDict, numOfConstraints, timeout):
     return data
 
 class DiffConstraintsExperiment:
-    def __init__(self, decisionHeuristicFactory):
-        self.decisionHeuristicFactory = decisionHeuristicFactory
+    def __init__(self):
         self.rulesCreator = SudokuRules(9)
 
     def rulesOf(self, rows, cols, blocks):
@@ -163,9 +162,7 @@ if __name__ == "__main__":
     timeout = args.timeout
     print("numOfConstraints={}, timeout={}, start={}, end={}".format(numOfContraints, timeout, start, end))
 
-    decisionHeuristicFactory = lambda:  DummyBranchDecision()#RandomFalseBranchDecision()
-
     before = time.time()
-    experiment = DiffConstraintsExperiment(decisionHeuristicFactory)
+    experiment = DiffConstraintsExperiment()
     experiment.run(numOfContraints, timeout, start, end)
     print("time={} seconds".format(time.time()-before))

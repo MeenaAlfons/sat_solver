@@ -3,7 +3,7 @@ from matplotlib import pyplot as plt
 from scipy.stats import kendalltau
 import seaborn as sns
 
-metrics = ['loop', 'backtrack']#, 'flip', 'unit']
+metrics = ['loop', 'backtrack', 'flip', 'unit']
 
 #load the dataset
 data = pd.read_csv('SingleCummulativeForEachConstraint_0_1011.csv')

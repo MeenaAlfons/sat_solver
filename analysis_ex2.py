@@ -5,7 +5,7 @@ import seaborn as sns
 
 # settings
 metrics = ['loop', 'backtrack', 'flip', 'unit']
-average_data_over_runs = True
+average_data_over_runs = False
 
 #load the dataset
 data = pd.read_csv('results/combined_SingleCummulativeForEachConstraint_0_1011.csv')
@@ -46,6 +46,12 @@ if False:
     for metric in metrics:
         plt.hist2d(data['numOfConstraints'], data[metric], bins=[27, 70], cmap=plt.cm.Reds)
         plt.colorbar()
+        plt.show()
+
+# boxplots
+if True:
+    for metric in metrics:
+        boxplot = data.boxplot(column=[metric], by=['numOfConstraints'])
         plt.show()
 
 # test if the ranks of the metrics values are correlated with number of constraints with

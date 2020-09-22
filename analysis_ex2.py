@@ -49,9 +49,21 @@ if False:
         plt.show()
 
 # boxplots
-if False:
+if True:
+    # replace 0 values to values of 0.1 for visualization purposes
+    biased_data = data.replace({'loop':0,
+                                'unit':0,
+                                'backtrack':0,
+                                'flip':0},
+                               0.1)
     for metric in metrics:
-        boxplot = data.boxplot(column=[metric], by=['numOfConstraints'])
+        boxplot = biased_data.boxplot(column=[metric], by=['numOfConstraints'])
+        plt.yscale('log')
+        plt.title('')
+        plt.ylabel(metric+'s [log]')
+        plt.grid(False)
+        plt.xlabel('number of constraints')
+        plt.ylim(biased_data[metric].min()-1, biased_data[metric].max()+10)
         plt.show()
 
 # test if the ranks of the metrics values are correlated with number of constraints with

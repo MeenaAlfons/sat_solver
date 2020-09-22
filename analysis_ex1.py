@@ -12,13 +12,13 @@ grouped_data = data.groupby(by=['name'])
 print(grouped_data)
 
 # split data for easier comparison
-loop_data = DataFrame(columns=['DLIS(True)', 'DLIS(False)', 'JW-OS', 'DLCS', 'Dummy'],
+loop_data = DataFrame(columns=['DLIS(True)', 'DLIS(False)', 'JW-OS', 'DLCS', 'Dummy', 'RandomFalse'],
                       index=range(1, int(len(data)/5)+1))
-flip_data = DataFrame(columns=['DLIS(True)', 'DLIS(False)', 'JW-OS', 'DLCS', 'Dummy'],
+flip_data = DataFrame(columns=['DLIS(True)', 'DLIS(False)', 'JW-OS', 'DLCS', 'Dummy', 'RandomFalse'],
                       index=range(1, int(len(data)/5)+1))
-backtrack_data = DataFrame(columns=['DLIS(True)', 'DLIS(False)', 'JW-OS', 'DLCS', 'Dummy'],
+backtrack_data = DataFrame(columns=['DLIS(True)', 'DLIS(False)', 'JW-OS', 'DLCS', 'Dummy', 'RandomFalse'],
                       index=range(1, int(len(data)/5)+1))
-unit_data = DataFrame(columns=['DLIS(True)', 'DLIS(False)', 'JW-OS', 'DLCS', 'Dummy'],
+unit_data = DataFrame(columns=['DLIS(True)', 'DLIS(False)', 'JW-OS', 'DLCS', 'Dummy', 'RandomFalse'],
                       index=range(1, int(len(data)/5)+1))
 split_data = {'loop':loop_data, 'flip':flip_data, 'backtrack':backtrack_data, 'unit':unit_data}
 
@@ -36,7 +36,8 @@ if True:
     for curr_data in split_data:
         df = split_data[curr_data]
         col = df.columns.values
-        boxplot = df.boxplot(column=['DLIS(True)','DLIS(False)', 'JW-OS', 'DLCS', 'Dummy'])
+        boxplot = df.boxplot(column=['DLIS(True)','DLIS(False)', 'JW-OS', 'DLCS', 'Dummy', 'RandomFalse'],
+                             grid=False)
         plt.ylabel(f'{curr_data}s')
         plt.ylim(0, 650)
         plt.show()
@@ -56,7 +57,8 @@ for curr_data in split_data:
                             split_data[curr_data]['DLIS(False)'],
                             split_data[curr_data]['JW-OS'],
                             split_data[curr_data]['DLCS'],
-                            split_data[curr_data]['Dummy']))
+                            split_data[curr_data]['Dummy'],
+                            split_data[curr_data]['RandomFalse']))
 
     # pvalue matrix for pairwise test
     # Indicates that for all metrics Dummy and DLIS(True) are not
@@ -65,14 +67,16 @@ for curr_data in split_data:
     print('\nPairwise comparison:')
     print(posthoc_nemenyi_friedman(split_data[curr_data].values))
 
-# Test whether there is a significant difference between Dummy and DLIS(True)
-for curr_data in split_data:
+# Test whether there is a significant difference between Dummy and DLIS(True). #todo: this part is flawed
+'''for curr_data in split_data:
     if False:
         split_data[curr_data].boxplot(column=['Dummy', 'DLIS(True)'])
         plt.title(curr_data)
         plt.ylim(0, 40)
         plt.show()
     print('\nWilcox test for Dummy against DLIS(True) for ' + curr_data + ' counts: ')
-    print(wilcoxon(split_data[curr_data]['Dummy'],
-                   split_data[curr_data]['DLIS(True)'],
-                   alternative='less'))
+    print('means: randomfalse: ' + str(split_data[curr_data]['RandomFalse'].mean()) + '\t dlis(true): ' +str(split_data[curr_data]['DLIS(True)'].mean()))
+    one=np.array(split_data[curr_data]['RandomFalse']).flatten()
+    two=np.array(split_data[curr_data]['DLIS(True)']).squeeze()
+    print(wilcoxon(np.array(split_data[curr_data]['RandomFalse']),
+                   np.array(split_data[curr_data]['DLIS(True)'])))'''

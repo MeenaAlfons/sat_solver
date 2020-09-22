@@ -3,7 +3,6 @@ from pandas import DataFrame
 from matplotlib import pyplot as plt
 from scipy.stats import shapiro, friedmanchisquare, wilcoxon
 from scikit_posthocs import posthoc_nemenyi_friedman
-import numpy as np
 
 # load the data
 data = pandas.read_csv('results/SolverComparison_0_1011.csv')
@@ -33,11 +32,12 @@ for key, _ in grouped_data:
     unit_data[key] = curr_group['unit']
 
 # plot boxplots
-if False:
+if True:
     for curr_data in split_data:
         df = split_data[curr_data]
         col = df.columns.values
-        boxplot = df.boxplot(column=['DLIS(True)','DLIS(False)', 'JW-OS', 'DLCS', 'Dummy', 'RandomFalse'])
+        boxplot = df.boxplot(column=['DLIS(True)','DLIS(False)', 'JW-OS', 'DLCS', 'Dummy', 'RandomFalse'],
+                             grid=False)
         plt.ylabel(f'{curr_data}s')
         plt.ylim(0, 650)
         plt.show()
@@ -68,7 +68,7 @@ for curr_data in split_data:
     print(posthoc_nemenyi_friedman(split_data[curr_data].values))
 
 # Test whether there is a significant difference between Dummy and DLIS(True). #todo: this part is flawed
-for curr_data in split_data:
+'''for curr_data in split_data:
     if False:
         split_data[curr_data].boxplot(column=['Dummy', 'DLIS(True)'])
         plt.title(curr_data)
@@ -79,4 +79,4 @@ for curr_data in split_data:
     one=np.array(split_data[curr_data]['RandomFalse']).flatten()
     two=np.array(split_data[curr_data]['DLIS(True)']).squeeze()
     print(wilcoxon(np.array(split_data[curr_data]['RandomFalse']),
-                   np.array(split_data[curr_data]['DLIS(True)'])))
+                   np.array(split_data[curr_data]['DLIS(True)'])))'''

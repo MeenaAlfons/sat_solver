@@ -49,7 +49,7 @@ if False:
         plt.show()
 
 # boxplots
-if True:
+if False:
     for metric in metrics:
         boxplot = data.boxplot(column=[metric], by=['numOfConstraints'])
         plt.show()
@@ -59,3 +59,14 @@ if True:
 for metric in metrics:
     print('correlation for ' + metric)
     print(kendalltau(data['numOfConstraints'], data[metric]))
+
+#seperate teset for dataset up to constraint 23 and from constraint 23 to 27.
+#to see if it first inceases and then drops.
+split_at = 22
+for metric in metrics:
+    print('\nCorrelation for ' + metric + ' for num of constraints 1-23')
+    print(kendalltau(data['numOfConstraints'].loc[(data['numOfConstraints'] < split_at)],
+                     data[metric].loc[(data['numOfConstraints'] < split_at)]))
+    print('\nCorrelation for ' + metric + ' for num of constraints 23-27')
+    print(kendalltau(data['numOfConstraints'].loc[(data['numOfConstraints'] > split_at)],
+                     data[metric].loc[(data['numOfConstraints'] > split_at)]))

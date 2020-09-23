@@ -26,7 +26,7 @@ def load_dimacs(filename):
         cnf = cnf.replace('\n', '').split(' 0')[:-1]
 
         # split clauses and cast to int
-        cnf = [[int(l) for l in c.split(' ')] for c in cnf][:-1]
+        cnf = [[int(l) for l in c.split(' ')] for c in cnf]
 
         return cnf, int(n_vars)
 
@@ -56,3 +56,16 @@ def load_sudokus(filename):
                     position += 1
 
         return sudoku_instances_cnf
+
+def save_model_dimacs(model, numOfVars, filename):
+    document = ""
+    document += "p cnf {} {}\n".format(numOfVars, len(model))
+    keys = list(model.keys())
+    keys.sort()
+    for key in keys:
+        literal = key if model[key] else -key
+        document += "{} 0\n".format(literal)
+
+    with open(filename, "w") as f:
+        f.write(document)
+

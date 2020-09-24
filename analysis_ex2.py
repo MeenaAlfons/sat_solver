@@ -57,13 +57,17 @@ if True:
                                 'flip':0},
                                0.1)
     for metric in metrics:
-        boxplot = biased_data.boxplot(column=[metric], by=['numOfConstraints'])
+        boxplot = biased_data.boxplot(column=[metric],
+                                      by=['numOfConstraints'],
+                                      figsize=(8, 3),
+                                      fontsize=22)
         plt.yscale('log')
         plt.title('')
-        plt.ylabel(metric+'s [log]')
+        plt.ylabel(metric+'s [log]', fontsize=21)
         plt.grid(False)
-        plt.xlabel('number of constraints')
+        plt.xlabel('number of constraints', fontsize=21)
         plt.ylim(biased_data[metric].min()-1, biased_data[metric].max()+10)
+        plt.suptitle('')
         plt.show()
 
 # test if the ranks of the metrics values are correlated with number of constraints with

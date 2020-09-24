@@ -48,7 +48,7 @@ class ExperimentRunner:
             data.extend(result)
 
         # Save output to csv
-        filename="{}_{}_{}.csv".format(experimentName, start, end)
+        filename="{}_{}_{}_{}.csv".format(experimentName, start, end, time.time())
         save_csv(filename, dataHeader, data)
         print("")
 

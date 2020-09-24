@@ -11,14 +11,16 @@ data = pandas.read_csv('results/SolverComparison_0_1011.csv')
 grouped_data = data.groupby(by=['name'])
 print(grouped_data)
 
+columns = ['DLIS(True)', 'DLIS(False)', 'JW-OS', 'DLCS', 'Dummy', 'RandomFalse', 'Random']
+
 # split data for easier comparison
-loop_data = DataFrame(columns=['DLIS(True)', 'DLIS(False)', 'JW-OS', 'DLCS', 'Dummy', 'RandomFalse'],
+loop_data = DataFrame(columns=columns,
                       index=range(1, int(len(data)/5)+1))
-flip_data = DataFrame(columns=['DLIS(True)', 'DLIS(False)', 'JW-OS', 'DLCS', 'Dummy', 'RandomFalse'],
+flip_data = DataFrame(columns=columns,
                       index=range(1, int(len(data)/5)+1))
-backtrack_data = DataFrame(columns=['DLIS(True)', 'DLIS(False)', 'JW-OS', 'DLCS', 'Dummy', 'RandomFalse'],
+backtrack_data = DataFrame(columns=columns,
                       index=range(1, int(len(data)/5)+1))
-unit_data = DataFrame(columns=['DLIS(True)', 'DLIS(False)', 'JW-OS', 'DLCS', 'Dummy', 'RandomFalse'],
+unit_data = DataFrame(columns=columns,
                       index=range(1, int(len(data)/5)+1))
 split_data = {'loop':loop_data, 'flip':flip_data, 'backtrack':backtrack_data, 'unit':unit_data}
 
@@ -36,7 +38,7 @@ if True:
     for curr_data in split_data:
         df = split_data[curr_data]
         col = df.columns.values
-        boxplot = df.boxplot(column=['DLIS(True)','DLIS(False)', 'JW-OS', 'DLCS', 'Dummy', 'RandomFalse'],
+        boxplot = df.boxplot(column=columns,
                              grid=False)
         plt.ylabel(f'{curr_data}s')
         plt.ylim(0, 650)
@@ -58,7 +60,8 @@ for curr_data in split_data:
                             split_data[curr_data]['JW-OS'],
                             split_data[curr_data]['DLCS'],
                             split_data[curr_data]['Dummy'],
-                            split_data[curr_data]['RandomFalse']))
+                            split_data[curr_data]['RandomFalse'],
+                            split_data[curr_data]['Random']))
 
     # pvalue matrix for pairwise test
     # Indicates that for all metrics Dummy and DLIS(True) are not

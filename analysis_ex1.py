@@ -1,8 +1,16 @@
 import pandas
 from pandas import DataFrame
+import matplotlib
 from matplotlib import pyplot as plt
-from scipy.stats import shapiro, friedmanchisquare, wilcoxon
+from scipy.stats import shapiro, friedmanchisquare
 from scikit_posthocs import posthoc_nemenyi_friedman
+
+#settings for plots
+font = {'family' : 'normal',
+        'weight' : 'bold',
+        'size'   : 22}
+
+matplotlib.rc('font', **font)
 
 # load the data
 data = pandas.read_csv('results/SolverComparison_0_1011.csv')
@@ -11,16 +19,21 @@ data = pandas.read_csv('results/SolverComparison_0_1011.csv')
 grouped_data = data.groupby(by=['name'])
 print(grouped_data)
 
+columns = ['DLIS(False)', 'JW-OS', 'DLCS','Dummy', 'RandomFalse', 'Random', 'DLIS(True)']
+
 # split data for easier comparison
-loop_data = DataFrame(columns=['DLIS(True)', 'DLIS(False)', 'JW-OS', 'DLCS', 'Dummy', 'RandomFalse'],
+loop_data = DataFrame(columns=columns,
                       index=range(1, int(len(data)/5)+1))
-flip_data = DataFrame(columns=['DLIS(True)', 'DLIS(False)', 'JW-OS', 'DLCS', 'Dummy', 'RandomFalse'],
+flip_data = DataFrame(columns=columns,
                       index=range(1, int(len(data)/5)+1))
-backtrack_data = DataFrame(columns=['DLIS(True)', 'DLIS(False)', 'JW-OS', 'DLCS', 'Dummy', 'RandomFalse'],
+backtrack_data = DataFrame(columns=columns,
                       index=range(1, int(len(data)/5)+1))
-unit_data = DataFrame(columns=['DLIS(True)', 'DLIS(False)', 'JW-OS', 'DLCS', 'Dummy', 'RandomFalse'],
+unit_data = DataFrame(columns=columns,
                       index=range(1, int(len(data)/5)+1))
-split_data = {'loop':loop_data, 'flip':flip_data, 'backtrack':backtrack_data, 'unit':unit_data}
+split_data = {#'loop':loop_data,
+             'flip':flip_data,
+            #'backtrack':backtrack_data,
+            'unit':unit_data}
 
 # fill in the values
 for key, _ in grouped_data:
@@ -36,9 +49,9 @@ if True:
     for curr_data in split_data:
         df = split_data[curr_data]
         col = df.columns.values
-        boxplot = df.boxplot(column=['DLIS(True)','DLIS(False)', 'JW-OS', 'DLCS', 'Dummy', 'RandomFalse'],
+        plt.figure(figsize=(10,5))
+        boxplot = df.boxplot(column=columns,
                              grid=False)
-        plt.ylabel(f'{curr_data}s')
         plt.ylim(0, 650)
         plt.show()
 
@@ -53,18 +66,20 @@ for curr_data in split_data:
 # -> The performances are significantly different with p approx. 0
 for curr_data in split_data:
     print('\n' + curr_data + ' friedman test:')
-    print(friedmanchisquare(split_data[curr_data]['DLIS(True)'],
-                            split_data[curr_data]['DLIS(False)'],
+    print(friedmanchisquare(split_data[curr_data]['DLIS(False)'],
                             split_data[curr_data]['JW-OS'],
                             split_data[curr_data]['DLCS'],
                             split_data[curr_data]['Dummy'],
-                            split_data[curr_data]['RandomFalse']))
+                            split_data[curr_data]['RandomFalse'],
+                            split_data[curr_data]['Random'],
+                            split_data[curr_data]['DLIS(True)']))
 
     # pvalue matrix for pairwise test
     # Indicates that for all metrics Dummy and DLIS(True) are not
     # significantly different. Neither are the other solvers between
     # them.
     print('\nPairwise comparison:')
+    print('\tDLIS(F)\tJW-OS\tDLCS\tDummy\tRandomF\tRandom\tDLIS(T)')
     print(posthoc_nemenyi_friedman(split_data[curr_data].values))
 
 # Test whether there is a significant difference between Dummy and DLIS(True). #todo: this part is flawed

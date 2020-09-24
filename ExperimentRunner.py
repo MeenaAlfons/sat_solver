@@ -9,6 +9,7 @@ import multiprocessing as mp
 
 from BasicDPLL import BasicDPLL
 from DummyBranchDecision import DummyBranchDecision
+from RandomBranchDecision import RandomBranchDecision
 from RandomFalseBranchDecision import RandomFalseBranchDecision
 from DynamicLargestCombinedSum import DynamicLargestCombinedSum
 from DynamicLargestIndividualSum import DynamicLargestIndividualSum
@@ -47,7 +48,7 @@ class ExperimentRunner:
             data.extend(result)
 
         # Save output to csv
-        filename="{}_{}_{}.csv".format(experimentName, start, end)
+        filename="{}_{}_{}_{}.csv".format(experimentName, start, end, time.time())
         save_csv(filename, dataHeader, data)
         print("")
 
@@ -70,6 +71,9 @@ def DummyBranchDecisionFactory():
 def RandomFalseBranchDecisionFactory():
     return RandomFalseBranchDecision()
 
+def RandomBranchDecisionFactory():
+    return RandomBranchDecision()
+
 class SolverComparisonExperimentRunner:
     def run(self, start = 0, end = 1011):
         rules, _ = load_dimacs('rules/sudoku_rules_9x9.txt')
@@ -77,6 +81,7 @@ class SolverComparisonExperimentRunner:
         data = []
 
         heuristicDict = {
+            "Random": RandomBranchDecisionFactory,
             "DLIS(True)": DynamicLargestIndividualSumTrueFactory,
             "DLIS(False)": DynamicLargestIndividualSumFalseFactory,
             "JW-OS": JeroslowWangOneSidedFactory,

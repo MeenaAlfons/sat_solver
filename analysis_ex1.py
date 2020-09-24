@@ -19,7 +19,7 @@ data = pandas.read_csv('results/SolverComparison_0_1011.csv')
 grouped_data = data.groupby(by=['name'])
 print(grouped_data)
 
-columns = ['Dummy', 'RandomFalse', 'Random', 'DLIS(True)']
+columns = ['DLIS(False)', 'JW-OS', 'DLCS','Dummy', 'RandomFalse', 'Random', 'DLIS(True)']
 
 # split data for easier comparison
 loop_data = DataFrame(columns=columns,
@@ -30,7 +30,10 @@ backtrack_data = DataFrame(columns=columns,
                       index=range(1, int(len(data)/5)+1))
 unit_data = DataFrame(columns=columns,
                       index=range(1, int(len(data)/5)+1))
-split_data = {'loop':loop_data, 'flip':flip_data, 'backtrack':backtrack_data, 'unit':unit_data}
+split_data = {#'loop':loop_data,
+             'flip':flip_data,
+            #'backtrack':backtrack_data,
+            'unit':unit_data}
 
 # fill in the values
 for key, _ in grouped_data:

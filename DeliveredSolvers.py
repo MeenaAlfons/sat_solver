@@ -30,7 +30,7 @@ class DeliveredSolvers():
         cnf, numOfVars = load_dimacs(filename)
         result, model = self.solve(solverNumber, cnf, numOfVars)
         print("result={}".format(result))
-        outputfilename = "{}.solution".format(filename)
+        outputfilename = "{}.out".format(filename)
         save_model_dimacs(model, numOfVars, outputfilename)
 
     def solve(self, solverNumber, cnf, numOfVars):

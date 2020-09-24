@@ -11,7 +11,7 @@ data = pandas.read_csv('results/SolverComparison_0_1011.csv')
 grouped_data = data.groupby(by=['name'])
 print(grouped_data)
 
-columns = ['DLIS(True)', 'DLIS(False)', 'JW-OS', 'DLCS', 'Dummy', 'RandomFalse', 'Random']
+columns = ['DLIS(False)', 'JW-OS', 'DLCS', 'Dummy', 'RandomFalse', 'Random', 'DLIS(True)']
 
 # split data for easier comparison
 loop_data = DataFrame(columns=columns,
@@ -55,19 +55,20 @@ for curr_data in split_data:
 # -> The performances are significantly different with p approx. 0
 for curr_data in split_data:
     print('\n' + curr_data + ' friedman test:')
-    print(friedmanchisquare(split_data[curr_data]['DLIS(True)'],
-                            split_data[curr_data]['DLIS(False)'],
+    print(friedmanchisquare(split_data[curr_data]['DLIS(False)'],
                             split_data[curr_data]['JW-OS'],
                             split_data[curr_data]['DLCS'],
                             split_data[curr_data]['Dummy'],
                             split_data[curr_data]['RandomFalse'],
-                            split_data[curr_data]['Random']))
+                            split_data[curr_data]['Random'],
+                            split_data[curr_data]['DLIS(True)']))
 
     # pvalue matrix for pairwise test
     # Indicates that for all metrics Dummy and DLIS(True) are not
     # significantly different. Neither are the other solvers between
     # them.
     print('\nPairwise comparison:')
+    print('\tDLIS(F)\tJW-OS\tDLCS\tDummy\tRandomF\tRandom\tDLIS(T)')
     print(posthoc_nemenyi_friedman(split_data[curr_data].values))
 
 # Test whether there is a significant difference between Dummy and DLIS(True). #todo: this part is flawed

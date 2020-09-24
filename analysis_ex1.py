@@ -1,8 +1,16 @@
 import pandas
 from pandas import DataFrame
+import matplotlib
 from matplotlib import pyplot as plt
-from scipy.stats import shapiro, friedmanchisquare, wilcoxon
+from scipy.stats import shapiro, friedmanchisquare
 from scikit_posthocs import posthoc_nemenyi_friedman
+
+#settings for plots
+font = {'family' : 'normal',
+        'weight' : 'bold',
+        'size'   : 22}
+
+matplotlib.rc('font', **font)
 
 # load the data
 data = pandas.read_csv('results/SolverComparison_0_1011.csv')
@@ -11,7 +19,7 @@ data = pandas.read_csv('results/SolverComparison_0_1011.csv')
 grouped_data = data.groupby(by=['name'])
 print(grouped_data)
 
-columns = ['DLIS(False)', 'JW-OS', 'DLCS', 'Dummy', 'RandomFalse', 'Random', 'DLIS(True)']
+columns = ['Dummy', 'RandomFalse', 'Random', 'DLIS(True)']
 
 # split data for easier comparison
 loop_data = DataFrame(columns=columns,
@@ -38,9 +46,9 @@ if True:
     for curr_data in split_data:
         df = split_data[curr_data]
         col = df.columns.values
+        plt.figure(figsize=(10,5))
         boxplot = df.boxplot(column=columns,
                              grid=False)
-        plt.ylabel(f'{curr_data}s')
         plt.ylim(0, 650)
         plt.show()
 

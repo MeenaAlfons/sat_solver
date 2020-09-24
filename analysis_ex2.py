@@ -79,7 +79,7 @@ for metric in metrics:
 
 #seperate teset for dataset up to constraint 23 and from constraint 23 to 27.
 #to see if it first inceases and then drops.
-split_at = 15
+split_at = 14
 for metric in metrics:
     print('\nCorrelation for ' + metric + ' for num of constraints 1-23')
     print(kendalltau(data['numOfConstraints'].loc[(data['numOfConstraints'] < split_at)],

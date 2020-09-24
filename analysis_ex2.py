@@ -4,7 +4,7 @@ from scipy.stats import kendalltau
 import seaborn as sns
 
 # settings
-metrics = ['loop', 'backtrack', 'flip', 'unit']
+metrics = ['flip', 'unit']
 average_data_over_runs = False
 
 #load the dataset
@@ -50,20 +50,21 @@ if False:
 
 # boxplots
 if True:
-    # replace 0 values to values of 0.1 for visualization purposes
-    biased_data = data.replace({'loop':0,
-                                'unit':0,
-                                'backtrack':0,
-                                'flip':0},
-                               0.1)
+    # add 1 for all values for visualization purposes
+    ones = pd.Series([1 for i in range(len(data))])
+    biased_data = data
     for metric in metrics:
+        biased_data[metric] += ones
         boxplot = biased_data.boxplot(column=[metric],
                                       by=['numOfConstraints'],
                                       figsize=(8, 3),
                                       fontsize=22)
         plt.yscale('log')
         plt.title('')
-        plt.ylabel(metric+'s [log]', fontsize=21)
+        if metric != 'flip':
+            plt.ylabel(metric+'s [log]', fontsize=21)
+        else:
+            plt.ylabel('conflicts [log]', fontsize=21)
         plt.grid(False)
         plt.xlabel('number of constraints', fontsize=21)
         plt.ylim(biased_data[metric].min()-1, biased_data[metric].max()+10)
@@ -78,7 +79,7 @@ for metric in metrics:
 
 #seperate teset for dataset up to constraint 23 and from constraint 23 to 27.
 #to see if it first inceases and then drops.
-split_at = 22
+split_at = 15
 for metric in metrics:
     print('\nCorrelation for ' + metric + ' for num of constraints 1-23')
     print(kendalltau(data['numOfConstraints'].loc[(data['numOfConstraints'] < split_at)],
